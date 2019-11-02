@@ -1,0 +1,1 @@
+data class GameState(val players: Map<Int, Player>)

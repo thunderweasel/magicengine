@@ -1,6 +1,7 @@
 package engine
 
 import engine.action.GameAction
+import engine.domain.startingState
 import engine.model.*
 import engine.reducer.reduceGameState
 import engine.shuffler.ActualRandomizer
@@ -13,15 +14,9 @@ class MagicEngine(
     val randomizer: Randomizer = ActualRandomizer()
 ) {
     fun start2PlayerGame(deck1: List<Card>, deck2: List<Card>): GameState =
-        GameState(
-            players = listOf(deck1, deck2).mapIndexed { index, deck ->
-                PlayerState(
-                    id = index + 1,
-                    library = shuffler.shuffle(deck),
-                    lifeTotal = 20
-                )
-            },
-            gameStart = GameStart.PlayerMustDecideWhoGoesFirst(playerId = randomizer.randomInt(1, 2))
+        startingState(
+            shuffledPlayerDecks = listOf(deck1, deck2).map { shuffler.shuffle(it) },
+            playerDecidesWhoGoesFirst = randomizer.randomInt(1, 2)
         )
 
     fun performAction(action: GameAction, state: GameState): GameState = reduceGameState(action, state)

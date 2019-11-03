@@ -5,10 +5,10 @@ import engine.MagicEngine
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
 import engine.model.*
-import engine.model.GamePosition.StartingGameState.FirstPlayerMustBeChosenBy
-import engine.model.GamePosition.StartingGameState.ResolvingMulligans
-import engine.shuffler.FakeRandomizer
-import engine.shuffler.Shuffler
+import engine.model.GameStart.FirstPlayerMustBeChosenBy
+import engine.model.GameStart.ResolvingMulligans
+import engine.random.FakeRandomizer
+import engine.random.Shuffler
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 
@@ -103,7 +103,7 @@ private object States {
                     mulliganDecision = MulliganDecision.UNDECIDED
                 )
             ),
-            gamePosition = FirstPlayerMustBeChosenBy(PlayerStateFactory.ID_ALICE)
+            gameStart = FirstPlayerMustBeChosenBy(PlayerStateFactory.ID_ALICE)
         )
     }
 
@@ -125,7 +125,7 @@ private object States {
                     mulliganDecision = MulliganDecision.UNDECIDED
                 )
             ),
-            gamePosition = ResolvingMulligans(currentChoice = PlayerStateFactory.ID_BOB)
+            gameStart = ResolvingMulligans(currentChoice = PlayerStateFactory.ID_BOB)
         )
     }
 
@@ -147,7 +147,7 @@ private object States {
                     mulliganDecision = MulliganDecision.WILL_KEEP
                 )
             ),
-            gamePosition = ResolvingMulligans(currentChoice = PlayerStateFactory.ID_ALICE)
+            gameStart = ResolvingMulligans(currentChoice = PlayerStateFactory.ID_ALICE)
         )
     }
 
@@ -174,7 +174,7 @@ private object States {
                     mulliganDecision = MulliganDecision.WILL_KEEP
                 )
             ),
-            gamePosition = ResolvingMulligans(currentChoice = PlayerStateFactory.ID_ALICE)
+            gameStart = ResolvingMulligans(currentChoice = PlayerStateFactory.ID_ALICE)
         )
     }
 }

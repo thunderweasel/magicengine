@@ -1,7 +1,7 @@
 package engine.domain
 
 import engine.model.*
-import engine.model.GamePosition.StartingGameState.FirstPlayerMustBeChosenBy
+import engine.model.GameStart.FirstPlayerMustBeChosenBy
 
 fun startingState(
     shuffledPlayerDecks: List<List<Card>>,
@@ -15,5 +15,5 @@ fun startingState(
             mulliganDecision = MulliganDecision.UNDECIDED
         )
     },
-    gamePosition = FirstPlayerMustBeChosenBy(playerDecidesWhoGoesFirst)
+    gameStart = FirstPlayerMustBeChosenBy(playerDecidesWhoGoesFirst)
 )

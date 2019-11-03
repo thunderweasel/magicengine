@@ -1,4 +1,4 @@
-package engine.shuffler
+package engine.random
 
 import kotlin.random.Random
 

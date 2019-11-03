@@ -1,20 +1,28 @@
 package engine
 
-import engine.action.GameAction
 import engine.action.PlayerAction
 import engine.domain.startingState
 import engine.model.*
 import engine.reducer.reduceGameState
-import engine.shuffler.ActualRandomizer
-import engine.shuffler.RandomShuffler
-import engine.shuffler.Randomizer
-import engine.shuffler.Shuffler
+import engine.random.ActualRandomizer
+import engine.random.RandomShuffler
+import engine.random.Randomizer
+import engine.random.Shuffler
+import engine.model.noPendingRandomization
+import engine.random.RandomizationResolver
+import engine.reducer.GameStateReducer
 
 class MagicEngine(
     val shuffler: Shuffler<Card> = RandomShuffler(),
     val randomizer: Randomizer = ActualRandomizer(),
-    val reducer: (GameAction, GameStatePendingRandomization) -> GameStatePendingRandomization = ::reduceGameState
+    val reducer: GameStateReducer = ::reduceGameState
 ) {
+    private val randomizationResolver = RandomizationResolver(
+        shuffler = shuffler,
+        randomizer = randomizer,
+        reducer = reducer
+    )
+
     fun start2PlayerGame(deck1: List<Card>, deck2: List<Card>): GameState =
         startingState(
             shuffledPlayerDecks = listOf(deck1, deck2).map { shuffler.shuffle(it) },
@@ -22,21 +30,7 @@ class MagicEngine(
         )
 
     fun performAction(action: PlayerAction, state: GameState): GameState {
-        var statePendingRandomization = reducer(GameAction.ByPlayer(action), state.noRandomization())
-        var pendingAction = statePendingRandomization.pendingAction
-        while (pendingAction != null) {
-            val randomizationResult = GameAction.RandomizationResult(
-                playerAction = pendingAction.playerAction,
-                results = pendingAction.pendingRandomization.map {
-                    when (it) {
-                        is RandomRequest.Shuffle -> shuffler.shuffle(it.cards)
-                        is RandomRequest.NumberInRange -> randomizer.randomInt(it.range.first, it.range.last)
-                    }
-                }
-            )
-            statePendingRandomization = reducer(randomizationResult, statePendingRandomization)
-            pendingAction = statePendingRandomization.pendingAction
-        }
-        return statePendingRandomization.gameState
+        val gameStateAfterPlayerAction = reducer(action, state.noPendingRandomization())
+        return randomizationResolver.resolve(gameStateAfterPlayerAction)
     }
 }

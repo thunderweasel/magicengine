@@ -1,9 +1,7 @@
 package engine.model
 
 sealed class GameStart {
-    data class PlayerMustDecideWhoGoesFirst(val playerId: PlayerId) : GameStart()
-    data class Mulligans(
-        val currentPlayer: PlayerId,
-        val mulliganStates: Map<PlayerId, MulliganDecision>
-    ) : GameStart()
+    data class FirstPlayerMustBeChosenBy(val player: PlayerId): GameStart()
+    data class ResolvingMulligans(val currentChoice: PlayerId): GameStart()
+    object GameStarted: GameStart()
 }

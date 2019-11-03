@@ -1,4 +1,4 @@
-package engine.shuffler
+package engine.random
 
 class FakeRandomizer(
     private val randomValues: List<Int>

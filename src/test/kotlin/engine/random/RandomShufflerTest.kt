@@ -1,4 +1,4 @@
-package engine.shuffler
+package engine.random
 
 import io.kotlintest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotlintest.shouldBe

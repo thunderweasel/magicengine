@@ -7,7 +7,7 @@ data class GameStatePendingRandomization(
     val pendingAction: PendingRandomizedAction? = null
 )
 
-fun GameState.noRandomization() =
+fun GameState.noPendingRandomization() =
     GameStatePendingRandomization(this, pendingAction = null)
 
 fun GameState.pendingRandomization(pendingAction: PendingRandomizedAction) =

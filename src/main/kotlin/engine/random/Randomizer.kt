@@ -1,4 +1,4 @@
-package engine.shuffler
+package engine.random
 
 interface Randomizer {
     // Generate a number between from and to (inclusive)

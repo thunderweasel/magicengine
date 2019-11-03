@@ -1,6 +1,7 @@
 package engine
 
 import engine.action.GameAction
+import engine.action.PlayerAction
 import engine.domain.startingState
 import engine.model.*
 import engine.reducer.reduceGameState
@@ -19,5 +20,24 @@ class MagicEngine(
             playerDecidesWhoGoesFirst = randomizer.randomInt(1, 2)
         )
 
-    fun performAction(action: GameAction, state: GameState): GameState = reduceGameState(action, state)
+    fun performAction(action: PlayerAction, state: GameState): GameState {
+        var statePendingRandomization = reduceGameState(GameAction.ByPlayer(action), state.pendingNoRandomization())
+        var pendingAction = statePendingRandomization.pendingAction
+        while (pendingAction != null) {
+            val randomizationResult = GameAction.RandomizationResult(
+                result = RandomResult(
+                    action = pendingAction.action,
+                    results = pendingAction.pendingRandomization.map {
+                        when (it) {
+                            is RandomRequest.Shuffle -> shuffler.shuffle(it.cards)
+                            is RandomRequest.NumberInRange -> randomizer.randomInt(it.range.first, it.range.last)
+                        }
+                    }
+                )
+            )
+            statePendingRandomization = reduceGameState(randomizationResult, statePendingRandomization)
+            pendingAction = statePendingRandomization.pendingAction
+        }
+        return statePendingRandomization.gameState
+    }
 }

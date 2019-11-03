@@ -1,7 +1,8 @@
 package engine.action
 
-import engine.domain.PlayerId
+import engine.model.RandomResult
 
 sealed class GameAction {
-    data class ChooseFirstPlayer(val chosenPlayer: PlayerId): GameAction()
+    data class ByPlayer(val playerAction: PlayerAction): GameAction()
+    data class RandomizationResult(val result: RandomResult): GameAction()
 }

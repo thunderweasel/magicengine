@@ -1,7 +1,5 @@
 package engine.model
 
-import engine.domain.PlayerId
-
 data class PlayerState(
     val id: PlayerId,
     val hand: List<Card> = listOf(),

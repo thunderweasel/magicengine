@@ -1,6 +1,6 @@
 package engine.action
 
-import engine.domain.PlayerId
+import engine.model.PlayerId
 
 sealed class PlayerAction {
     data class ChooseFirstPlayer(val chosenPlayer: PlayerId): PlayerAction()

@@ -12,7 +12,8 @@ import engine.shuffler.Shuffler
 
 class MagicEngine(
     val shuffler: Shuffler<Card> = RandomShuffler(),
-    val randomizer: Randomizer = ActualRandomizer()
+    val randomizer: Randomizer = ActualRandomizer(),
+    val reducer: (GameAction, GameStatePendingRandomization) -> GameStatePendingRandomization = ::reduceGameState
 ) {
     fun start2PlayerGame(deck1: List<Card>, deck2: List<Card>): GameState =
         startingState(
@@ -21,21 +22,19 @@ class MagicEngine(
         )
 
     fun performAction(action: PlayerAction, state: GameState): GameState {
-        var statePendingRandomization = reduceGameState(GameAction.ByPlayer(action), state.noRandomization())
+        var statePendingRandomization = reducer(GameAction.ByPlayer(action), state.noRandomization())
         var pendingAction = statePendingRandomization.pendingAction
         while (pendingAction != null) {
             val randomizationResult = GameAction.RandomizationResult(
-                result = RandomResult(
-                    action = pendingAction.action,
-                    results = pendingAction.pendingRandomization.map {
-                        when (it) {
-                            is RandomRequest.Shuffle -> shuffler.shuffle(it.cards)
-                            is RandomRequest.NumberInRange -> randomizer.randomInt(it.range.first, it.range.last)
-                        }
+                playerAction = pendingAction.playerAction,
+                results = pendingAction.pendingRandomization.map {
+                    when (it) {
+                        is RandomRequest.Shuffle -> shuffler.shuffle(it.cards)
+                        is RandomRequest.NumberInRange -> randomizer.randomInt(it.range.first, it.range.last)
                     }
-                )
+                }
             )
-            statePendingRandomization = reduceGameState(randomizationResult, statePendingRandomization)
+            statePendingRandomization = reducer(randomizationResult, statePendingRandomization)
             pendingAction = statePendingRandomization.pendingAction
         }
         return statePendingRandomization.gameState

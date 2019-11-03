@@ -1,3 +1,3 @@
-package engine.domain
+package engine.model
 
 typealias PlayerId = Int

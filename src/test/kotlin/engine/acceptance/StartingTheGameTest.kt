@@ -2,13 +2,11 @@ package engine.acceptance
 
 import engine.action.PlayerAction
 import engine.MagicEngine
-import engine.domain.MulliganState
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
-import engine.model.Card
-import engine.model.GameState
-import engine.model.PlayerState
-import engine.model.GameStart
+import engine.model.*
+import engine.model.GamePosition.StartingGameState.FirstPlayerMustBeChosenBy
+import engine.model.GamePosition.StartingGameState.ResolvingMulligans
 import engine.shuffler.FakeRandomizer
 import engine.shuffler.Shuffler
 import io.kotlintest.shouldBe
@@ -95,15 +93,17 @@ private object States {
                 PlayerState(
                     id = PlayerStateFactory.ID_ALICE,
                     library = DeckFactory.alice.shuffle(1),
-                    lifeTotal = 20
+                    lifeTotal = 20,
+                    mulliganDecision = MulliganDecision.UNDECIDED
                 ),
                 PlayerState(
                     id = PlayerStateFactory.ID_BOB,
                     library = DeckFactory.bob.shuffle(1),
-                    lifeTotal = 20
+                    lifeTotal = 20,
+                    mulliganDecision = MulliganDecision.UNDECIDED
                 )
             ),
-            gameStart = GameStart.PlayerMustDecideWhoGoesFirst(playerId = PlayerStateFactory.ID_ALICE)
+            gamePosition = FirstPlayerMustBeChosenBy(PlayerStateFactory.ID_ALICE)
         )
     }
 
@@ -114,34 +114,40 @@ private object States {
                     id = PlayerStateFactory.ID_ALICE,
                     library = DeckFactory.alice.shuffle(1).minus(elements = expectedAliceHand1),
                     lifeTotal = 20,
-                    hand = expectedAliceHand1
+                    hand = expectedAliceHand1,
+                    mulliganDecision = MulliganDecision.UNDECIDED
                 ),
                 PlayerState(
                     id = PlayerStateFactory.ID_BOB,
                     library = DeckFactory.bob.shuffle(1).minus(elements = expectedBobHand1),
                     lifeTotal = 20,
-                    hand = expectedBobHand1
+                    hand = expectedBobHand1,
+                    mulliganDecision = MulliganDecision.UNDECIDED
                 )
             ),
-            gameStart = GameStart.Mulligans(
-                currentPlayer = PlayerStateFactory.ID_BOB,
-                mulliganStates = mapOf(
-                    PlayerStateFactory.ID_BOB to MulliganState.UNDECIDED,
-                    PlayerStateFactory.ID_ALICE to MulliganState.UNDECIDED
-                )
-            )
+            gamePosition = ResolvingMulligans(currentChoice = PlayerStateFactory.ID_BOB)
         )
     }
 
     val bobDecidedToKeep by lazy {
-        drawnFirstHands.copy(
-            gameStart = GameStart.Mulligans(
-                currentPlayer = PlayerStateFactory.ID_ALICE,
-                mulliganStates = mapOf(
-                    PlayerStateFactory.ID_BOB to MulliganState.WILL_KEEP,
-                    PlayerStateFactory.ID_ALICE to MulliganState.UNDECIDED
+        GameState(
+            players = listOf(
+                PlayerState(
+                    id = PlayerStateFactory.ID_ALICE,
+                    library = DeckFactory.alice.shuffle(1).minus(elements = expectedAliceHand1),
+                    lifeTotal = 20,
+                    hand = expectedAliceHand1,
+                    mulliganDecision = MulliganDecision.UNDECIDED
+                ),
+                PlayerState(
+                    id = PlayerStateFactory.ID_BOB,
+                    library = DeckFactory.bob.shuffle(1).minus(elements = expectedBobHand1),
+                    lifeTotal = 20,
+                    hand = expectedBobHand1,
+                    mulliganDecision = MulliganDecision.WILL_KEEP
                 )
-            )
+            ),
+            gamePosition = ResolvingMulligans(currentChoice = PlayerStateFactory.ID_ALICE)
         )
     }
 
@@ -154,7 +160,9 @@ private object States {
                     // Alice should have drawn their second hand
                     hand = expectedAliceHand2,
                     // Library should have been shuffled twice now
-                    library = DeckFactory.alice.shuffle(2).minus(elements = expectedAliceHand2)
+                    library = DeckFactory.alice.shuffle(2).minus(elements = expectedAliceHand2),
+                    // Alice goes back to undecided, since she has to decide whether to keep the new hand
+                    mulliganDecision = MulliganDecision.UNDECIDED
                 ),
                 PlayerState(
                     id = PlayerStateFactory.ID_BOB,
@@ -162,17 +170,11 @@ private object States {
                     hand = expectedBobHand1,
                     // Library should have been only shuffled once
                     library = DeckFactory.bob.shuffle(1).minus(elements = expectedBobHand1),
-                    lifeTotal = 20
+                    lifeTotal = 20,
+                    mulliganDecision = MulliganDecision.WILL_KEEP
                 )
             ),
-            gameStart = GameStart.Mulligans(
-                currentPlayer = PlayerStateFactory.ID_ALICE,
-                mulliganStates = mapOf(
-                    PlayerStateFactory.ID_BOB to MulliganState.WILL_KEEP,
-                    // Alice goes back to undecided, since she has to decide whether to keep the new hand
-                    PlayerStateFactory.ID_ALICE to MulliganState.UNDECIDED
-                )
-            )
+            gamePosition = ResolvingMulligans(currentChoice = PlayerStateFactory.ID_ALICE)
         )
     }
 }

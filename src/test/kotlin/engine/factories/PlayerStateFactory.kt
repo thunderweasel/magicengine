@@ -1,6 +1,7 @@
 package engine.factories
 
 import engine.model.Card
+import engine.model.MulliganDecision
 import engine.model.PlayerState
 
 object PlayerStateFactory {
@@ -11,11 +12,13 @@ object PlayerStateFactory {
         id: Int = 0,
         hand: List<Card> = listOf(),
         library: List<Card> = DeckFactory.alice,
-        lifeTotal: Long = 20
+        lifeTotal: Long = 20,
+        mulliganDecision: MulliganDecision = MulliganDecision.UNDECIDED
     ) = PlayerState(
         id = id,
         hand = hand,
         library = library,
-        lifeTotal = lifeTotal
+        lifeTotal = lifeTotal,
+        mulliganDecision = mulliganDecision
     )
 }

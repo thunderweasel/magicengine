@@ -3,9 +3,15 @@ package engine.reducer
 import engine.action.GameAction
 import engine.action.PendingRandomizedAction
 import engine.action.PlayerAction
-import engine.domain.MulliganState
+import engine.model.MulliganDecision
 import engine.domain.drawCards
-import engine.model.*
+import engine.model.Card
+import engine.model.GameState
+import engine.model.GameStatePendingRandomization
+import engine.model.noRandomization
+import engine.model.GamePosition.StartingGameState.ResolvingMulligans
+import engine.model.RandomRequest
+import engine.model.pendingRandomization
 
 private const val STARTING_HAND_SIZE = 7
 
@@ -20,36 +26,51 @@ private fun handlePlayerAction(action: PlayerAction, state: GameState): GameStat
         is PlayerAction.ChooseFirstPlayer ->
             state.copy(
                 players = state.players.map { it.drawCards(STARTING_HAND_SIZE) },
-                gameStart = GameStart.Mulligans(
-                    currentPlayer = action.chosenPlayer,
-                    mulliganStates = state.players
-                        .map { it.id to MulliganState.UNDECIDED }
-                        .toMap()
-                )
-            ).pendingNoRandomization()
-        is PlayerAction.KeepHand ->
+                gamePosition = ResolvingMulligans(action.chosenPlayer)
+            ).noRandomization()
+        is PlayerAction.KeepHand -> {
+            val mulliganState = state.gamePosition as ResolvingMulligans
             state.copy(
-                gameStart = GameStart.Mulligans(
-                    currentPlayer = ((state.gameStart as GameStart.Mulligans).currentPlayer + 1) % 2,
-                    mulliganStates = state.gameStart.mulliganStates.plus(state.gameStart.currentPlayer to MulliganState.WILL_KEEP)
+                players = state.players.map {
+                    if (it.id == mulliganState.currentChoice) {
+                        it.copy(
+                            mulliganDecision = MulliganDecision.WILL_KEEP
+                        )
+                    } else {
+                        it
+                    }
+                },
+                gamePosition = ResolvingMulligans(
+                    currentChoice = 1 // TODO: obviously wrong
                 )
-            ).pendingNoRandomization()
-        is PlayerAction.Mulligan ->
+            ).noRandomization()
+        }
+        is PlayerAction.Mulligan -> {
+            val mulliganState = state.gamePosition as ResolvingMulligans
             state.copy(
-                gameStart = GameStart.Mulligans(
-                    currentPlayer = (state.gameStart as GameStart.Mulligans).currentPlayer,
-                    mulliganStates = state.gameStart.mulliganStates.plus(state.gameStart.currentPlayer to MulliganState.WILL_MULLIGAN)
-                )
-            ).pendingRandomization {
-                PendingRandomizedAction(
-                    action,
-                    (gameStart as GameStart.Mulligans).mulliganStates
-                        .filter { it.value == MulliganState.WILL_MULLIGAN }
-                            // TODO: this is stupid
-                        .map { RandomRequest.Shuffle(players[it.key - 1].hand.plus(players[it.key - 1].library)) }
-                )
-            }
+                players = state.players.map { prevPlayerState ->
+                    if (prevPlayerState.id == mulliganState.currentChoice) {
+                        prevPlayerState.copy(
+                            mulliganDecision = MulliganDecision.WILL_MULLIGAN,
+                            hand = listOf(),
+                            library = prevPlayerState.hand.plus(prevPlayerState.library)
+                        )
+                    } else {
+                        prevPlayerState
+                    }
+                }
+            )
+                .pendingRandomization {
+                    PendingRandomizedAction(
+                        action = action,
+                        pendingRandomization = players
+                            .filter { it.mulliganDecision == MulliganDecision.WILL_MULLIGAN }
+                            .map { RandomRequest.Shuffle(it.library) }
+                    )
+                }
+        }
     }
+
 
 private fun handleRandomizationResult(randomizationResult: GameAction.RandomizationResult, state: GameStatePendingRandomization) =
     when (randomizationResult.result.action) {
@@ -57,26 +78,17 @@ private fun handleRandomizationResult(randomizationResult: GameAction.Randomizat
             state.gameState.copy(
                 players = state.gameState.players
                     .map { playerState ->
-                        if ((state.gameState.gameStart as GameStart.Mulligans).mulliganStates[playerState.id] == MulliganState.WILL_MULLIGAN) {
+                        if (playerState.mulliganDecision == MulliganDecision.WILL_MULLIGAN) {
                             playerState.copy(
                                 // TODO: obviously wrong for multiple mulligans
-                                library = randomizationResult.result.results.first() as List<Card>
+                                library = randomizationResult.result.results.first() as List<Card>,
+                                mulliganDecision = MulliganDecision.UNDECIDED
                             ).drawCards(STARTING_HAND_SIZE)
                         } else {
                             playerState
                         }
-                    },
-                gameStart = (state.gameState.gameStart as GameStart.Mulligans).copy(
-                    mulliganStates = state.gameState.gameStart.mulliganStates
-                        .mapValues { (_, mulliganState) ->
-                            if (mulliganState == MulliganState.WILL_MULLIGAN) {
-                                MulliganState.UNDECIDED
-                            } else {
-                                mulliganState
-                            }
-                        }
-                )
-            ).pendingNoRandomization()
+                    }
+            ).noRandomization()
         }
         else -> state
     }

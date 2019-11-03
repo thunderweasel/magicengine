@@ -21,7 +21,7 @@ class MagicEngine(
         )
 
     fun performAction(action: PlayerAction, state: GameState): GameState {
-        var statePendingRandomization = reduceGameState(GameAction.ByPlayer(action), state.pendingNoRandomization())
+        var statePendingRandomization = reduceGameState(GameAction.ByPlayer(action), state.noRandomization())
         var pendingAction = statePendingRandomization.pendingAction
         while (pendingAction != null) {
             val randomizationResult = GameAction.RandomizationResult(

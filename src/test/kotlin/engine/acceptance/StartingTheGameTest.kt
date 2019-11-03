@@ -34,7 +34,7 @@ class StartingTheGameTest : StringSpec({
         gameState shouldBe States.aliceWinsCoinToss
     }
 
-    // 103.4
+    // 103.4 (part 1)
     "once turn order is resolved, each player draws their starting hand" {
         val gameState = engine.performAction(
             GameAction.ChooseFirstPlayer(
@@ -99,7 +99,10 @@ private object States {
                     hand = expectedBobHand
                 )
             ),
-            gameStart = GameStart.Mulligans(currentPlayer = PlayerStateFactory.ID_BOB)
+            gameStart = GameStart.Mulligans(
+                currentPlayer = PlayerStateFactory.ID_BOB,
+                resolvedMulligans = listOf()
+            )
         )
     }
 }

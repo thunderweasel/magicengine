@@ -7,7 +7,7 @@ import engine.model.PlayerState
 
 fun startingState(
     shuffledPlayerDecks: List<List<Card>>,
-    playerDecidesWhoGoesFirst: Int
+    playerDecidesWhoGoesFirst: PlayerId
 ) = GameState(
     players = shuffledPlayerDecks.mapIndexed { index, deck ->
         PlayerState(

@@ -1,8 +1,10 @@
 package engine.model
 
+import engine.domain.PlayerId
+
 data class PlayerState(
-    val id: Int,
+    val id: PlayerId,
     val hand: List<Card> = listOf(),
     val library: List<Card> = listOf(),
-    val lifeTotal: Int
+    val lifeTotal: Long
 )

@@ -1,17 +1,17 @@
 package engine.acceptance
 
-import engine.GameState
 import engine.MagicEngine
-import engine.PlayerState
 import engine.factories.DeckFactory
 import engine.factories.PlayerFactory
 import engine.shuffler.CheatShuffleToTop
+import engine.model.GameState
+import engine.model.PlayerState
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 
 class GameStartTest : StringSpec({
     "at the start of a 2 player game, each player shuffles their deck and draws 7 cards" {
-        val gameState = MagicEngine(
+        val engine = MagicEngine(
             // cheat the shuffle order to make the test repeatable
             shuffler = CheatShuffleToTop(
                 listOf(
@@ -19,7 +19,9 @@ class GameStartTest : StringSpec({
                     DeckFactory.bobExampleHand
                 ).flatten()
             )
-        ).start2PlayerGame(
+        )
+
+        val gameState = engine.start2PlayerGame(
             player1 = PlayerFactory.alice,
             player2 = PlayerFactory.bob
         )

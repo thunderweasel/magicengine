@@ -1,7 +1,11 @@
 package engine
 
+import engine.model.Card
 import engine.shuffler.DefaultShuffler
 import engine.shuffler.Shuffler
+import engine.model.GameState
+import engine.model.Player
+import engine.model.PlayerState
 
 class MagicEngine(
     val shuffler: Shuffler<Card> = DefaultShuffler()

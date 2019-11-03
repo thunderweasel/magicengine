@@ -1,4 +1,4 @@
-package engine
+package engine.model
 
 data class PlayerState(
     val id: Int,

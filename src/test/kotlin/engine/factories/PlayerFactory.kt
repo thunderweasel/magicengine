@@ -1,6 +1,6 @@
 package engine.factories
 
-import engine.Player
+import engine.model.Player
 
 object PlayerFactory {
     val alice: Player by lazy {

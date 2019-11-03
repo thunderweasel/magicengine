@@ -1,3 +1,3 @@
 package engine
 
-data class GameState(val players: Set<PlayerState>)
+data class GameState(val players: List<PlayerState>)

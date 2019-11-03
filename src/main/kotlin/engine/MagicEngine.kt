@@ -8,18 +8,13 @@ class MagicEngine(
 ) {
     fun start2PlayerGame(player1: Player, player2: Player): GameState {
         return GameState(
-            players = setOf(
+            players = listOf(player1, player2).mapIndexed { index, player ->
                 PlayerState(
-                    id = 1,
-                    player = player1,
-                    hand = shuffler.shuffle(player1.deck.toList()).slice(0..6).toSet()
-                ),
-                PlayerState(
-                    id = 2,
-                    player = player2,
-                    hand = shuffler.shuffle(player2.deck.toList()).slice(0..6).toSet()
+                    id = index + 1,
+                    player = player,
+                    hand = shuffler.shuffle(player.deck).slice(0..6)
                 )
-            )
+            }
         )
     }
 }

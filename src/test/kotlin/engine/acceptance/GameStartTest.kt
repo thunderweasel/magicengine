@@ -25,16 +25,16 @@ class GameStartTest : StringSpec({
         )
 
         gameState shouldBe GameState(
-            players = setOf(
+            players = listOf(
                 PlayerState(
                     id = 1,
                     player = PlayerFactory.alice,
-                    hand = DeckFactory.aliceExampleHand.toSet()
+                    hand = DeckFactory.aliceExampleHand
                 ),
                 PlayerState(
                     id = 2,
                     player = PlayerFactory.bob,
-                    hand = DeckFactory.bobExampleHand.toSet()
+                    hand = DeckFactory.bobExampleHand
                 )
             )
         )

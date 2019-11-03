@@ -1,24 +1,26 @@
 package engine
 
-import engine.model.Card
-import engine.shuffler.DefaultShuffler
+import engine.model.*
+import engine.shuffler.ActualRandomizer
+import engine.shuffler.RandomShuffler
+import engine.shuffler.Randomizer
 import engine.shuffler.Shuffler
-import engine.model.GameState
-import engine.model.Player
-import engine.model.PlayerState
 
 class MagicEngine(
-    val shuffler: Shuffler<Card> = DefaultShuffler()
+    val shuffler: Shuffler<Card> = RandomShuffler(),
+    val randomizer: Randomizer = ActualRandomizer()
 ) {
-    fun start2PlayerGame(player1: Player, player2: Player): GameState {
-        return GameState(
+    fun start2PlayerGame(player1: Player, player2: Player): GameState =
+        GameState(
             players = listOf(player1, player2).mapIndexed { index, player ->
                 PlayerState(
                     id = index + 1,
                     player = player,
-                    hand = shuffler.shuffle(player.deck).slice(0..6)
+                    library = shuffler.shuffle(player.deck)
                 )
-            }
+            },
+            turnOrder = TurnOrder.PlayerMustChoose(playerId = randomizer.randomInt(1, 2))
         )
-    }
+
+    fun performAction(action: GameAction, state: GameState): GameState = TODO()
 }

@@ -3,6 +3,9 @@ package engine.factories
 import engine.model.Player
 
 object PlayerFactory {
+    val ID_ALICE = 1
+    val ID_BOB = 2
+
     val alice: Player by lazy {
         Player(
             name = "Alice",

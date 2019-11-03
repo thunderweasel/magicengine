@@ -1,6 +1,8 @@
 package engine
 
+import engine.action.GameAction
 import engine.model.*
+import engine.reducer.reduceGameState
 import engine.shuffler.ActualRandomizer
 import engine.shuffler.RandomShuffler
 import engine.shuffler.Randomizer
@@ -15,12 +17,12 @@ class MagicEngine(
             players = listOf(player1, player2).mapIndexed { index, player ->
                 PlayerState(
                     id = index + 1,
-                    player = player,
-                    library = shuffler.shuffle(player.deck)
+                    library = shuffler.shuffle(player.deck),
+                    lifeTotal = 20
                 )
             },
-            turnOrder = TurnOrder.PlayerMustChoose(playerId = randomizer.randomInt(1, 2))
+            gameStart = GameStart.PlayerMustDecideWhoGoesFirst(playerId = randomizer.randomInt(1, 2))
         )
 
-    fun performAction(action: GameAction, state: GameState): GameState = TODO()
+    fun performAction(action: GameAction, state: GameState): GameState = reduceGameState(action, state)
 }

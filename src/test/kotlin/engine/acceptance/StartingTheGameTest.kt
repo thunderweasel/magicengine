@@ -1,12 +1,12 @@
 package engine.acceptance
 
+import engine.action.GameAction
 import engine.MagicEngine
 import engine.factories.DeckFactory
 import engine.factories.PlayerFactory
-import engine.model.GameAction
 import engine.model.GameState
 import engine.model.PlayerState
-import engine.model.TurnOrder
+import engine.model.GameStart
 import engine.shuffler.FakeRandomizer
 import engine.shuffler.ReverseShuffler
 import io.kotlintest.shouldBe
@@ -24,7 +24,7 @@ class StartingTheGameTest : StringSpec({
         )
     )
 
-    // 103.1, 103.2
+    // 103.1, 103.2, 103.3 (implicit)
     "At the start of the game, decks are shuffled and a random player gets to choose turn order" {
         val gameState = engine.start2PlayerGame(
             player1 = PlayerFactory.alice,
@@ -38,7 +38,6 @@ class StartingTheGameTest : StringSpec({
     "once turn order is resolved, each player draws their starting hand" {
         val gameState = engine.performAction(
             GameAction.ChooseFirstPlayer(
-                actingPlayer = PlayerFactory.ID_ALICE,
                 chosenPlayer = PlayerFactory.ID_BOB
             ),
             States.aliceWinsCoinToss)
@@ -53,16 +52,16 @@ private object States {
             players = listOf(
                 PlayerState(
                     id = PlayerFactory.ID_ALICE,
-                    player = PlayerFactory.alice,
-                    library = DeckFactory.alice.reversed()
+                    library = DeckFactory.alice.reversed(),
+                    lifeTotal = 20
                 ),
                 PlayerState(
                     id = PlayerFactory.ID_BOB,
-                    player = PlayerFactory.bob,
-                    library = DeckFactory.bob.reversed()
+                    library = DeckFactory.bob.reversed(),
+                    lifeTotal = 20
                 )
             ),
-            turnOrder = TurnOrder.PlayerMustChoose(playerId = PlayerFactory.ID_ALICE)
+            gameStart = GameStart.PlayerMustDecideWhoGoesFirst(playerId = PlayerFactory.ID_ALICE)
         )
     }
 
@@ -89,18 +88,18 @@ private object States {
             players = listOf(
                 PlayerState(
                     id = PlayerFactory.ID_ALICE,
-                    player = PlayerFactory.alice,
-                    hand = expectedAliceHand,
-                    library = DeckFactory.alice.reversed().minus(expectedAliceHand)
+                    library = DeckFactory.alice.reversed().minus(elements = expectedAliceHand),
+                    lifeTotal = 20,
+                    hand = expectedAliceHand
                 ),
                 PlayerState(
                     id = PlayerFactory.ID_BOB,
-                    player = PlayerFactory.bob,
-                    hand = expectedBobHand,
-                    library = DeckFactory.bob.reversed().minus(expectedBobHand)
+                    library = DeckFactory.bob.reversed().minus(elements = expectedBobHand),
+                    lifeTotal = 20,
+                    hand = expectedBobHand
                 )
             ),
-            turnOrder = TurnOrder.PlayerGoesFirst(playerId = PlayerFactory.ID_BOB)
+            gameStart = GameStart.Mulligans(currentPlayer = PlayerFactory.ID_BOB)
         )
     }
 }

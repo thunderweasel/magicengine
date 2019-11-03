@@ -12,12 +12,12 @@ class MagicEngine(
     val shuffler: Shuffler<Card> = RandomShuffler(),
     val randomizer: Randomizer = ActualRandomizer()
 ) {
-    fun start2PlayerGame(player1: Player, player2: Player): GameState =
+    fun start2PlayerGame(deck1: List<Card>, deck2: List<Card>): GameState =
         GameState(
-            players = listOf(player1, player2).mapIndexed { index, player ->
+            players = listOf(deck1, deck2).mapIndexed { index, deck ->
                 PlayerState(
                     id = index + 1,
-                    library = shuffler.shuffle(player.deck),
+                    library = shuffler.shuffle(deck),
                     lifeTotal = 20
                 )
             },

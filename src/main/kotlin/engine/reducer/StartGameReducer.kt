@@ -1,11 +1,11 @@
 package engine.reducer
 
 import engine.action.GameAction
-import engine.action.PendingRandomizedAction
+import engine.action.PendingRandomization
 import engine.action.PlayerAction
-import engine.action.RandomizationResult
+import engine.action.RandomizedResultAction
+import engine.action.RandomizedResultAction.InnerAction.PerformMulligans
 import engine.domain.drawCards
-import engine.model.Card
 import engine.model.GameStart
 import engine.model.GameState
 import engine.model.GameStatePendingRandomization
@@ -46,8 +46,8 @@ private fun mulliganReducer(
     mulliganState: GameStart.ResolvingMulligans
 ): GameStatePendingRandomization {
     val gameState = state.gameState
-    return when (action) {
-        is PlayerAction.KeepHand ->
+    return when {
+        action is PlayerAction.KeepHand ->
             gameState.copy(
                 players = gameState.replacePlayerState(id = mulliganState.currentChoice) {
                     copy(mulliganDecision = MulliganDecision.WILL_KEEP)
@@ -56,27 +56,43 @@ private fun mulliganReducer(
                     currentChoice = 1 // TODO: obviously wrong
                 )
             ).noPendingRandomization()
-        is PlayerAction.Mulligan -> {
+        action is PlayerAction.Mulligan -> {
             gameState.copy(
                 players = gameState.replacePlayerState(mulliganState.currentChoice) {
                     copy(
                         mulliganDecision = MulliganDecision.WILL_MULLIGAN,
-                        hand = listOf(),
+                        hand = emptyList(),
                         library = hand.plus(library)
                     )
                 }
             )
                 // TODO: Should check at end of PlayerAction.KeepHand as well
                 .pendingRandomization {
-                    PendingRandomizedAction(
-                        playerAction = action,
-                        pendingRandomization = players
-                            .filter { it.mulliganDecision == MulliganDecision.WILL_MULLIGAN }
-                            .map { RandomRequest.Shuffle(it.library) }
+                    PendingRandomization(
+                        actionOnResolution = PerformMulligans,
+                        request = RandomRequest(
+                            shuffles = players
+                                .filter { it.mulliganDecision == MulliganDecision.WILL_MULLIGAN }
+                                .map { it.library }
+                        )
                     )
                 }
         }
-        is RandomizationResult -> handleRandomizationResult(action, state)
+        action is RandomizedResultAction && action.innerAction == PerformMulligans ->
+            state.gameState.copy(
+                players = state.gameState.players
+                    .map { playerState ->
+                        if (playerState.mulliganDecision == MulliganDecision.WILL_MULLIGAN) {
+                            playerState.copy(
+                                // TODO: obviously wrong for multiple mulligans
+                                library = action.resolvedRandomization.completedShuffles[0],
+                                mulliganDecision = MulliganDecision.UNDECIDED
+                            ).drawCards(STARTING_HAND_SIZE)
+                        } else {
+                            playerState
+                        }
+                    }
+            ).noPendingRandomization()
         else -> state
     }
 }
@@ -91,24 +107,3 @@ private inline fun GameState.replacePlayerState(
         it
     }
 }
-
-private fun handleRandomizationResult(randomizationResult: RandomizationResult, state: GameStatePendingRandomization) =
-    when (state.pendingAction?.playerAction) {
-        is PlayerAction.Mulligan -> {
-            state.gameState.copy(
-                players = state.gameState.players
-                    .map { playerState ->
-                        if (playerState.mulliganDecision == MulliganDecision.WILL_MULLIGAN) {
-                            playerState.copy(
-                                // TODO: obviously wrong for multiple mulligans
-                                library = randomizationResult.values.first() as List<Card>,
-                                mulliganDecision = MulliganDecision.UNDECIDED
-                            ).drawCards(STARTING_HAND_SIZE)
-                        } else {
-                            playerState
-                        }
-                    }
-            ).noPendingRandomization()
-        }
-        else -> state
-    }

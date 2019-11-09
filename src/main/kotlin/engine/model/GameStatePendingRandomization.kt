@@ -1,17 +1,17 @@
 package engine.model
 
-import engine.action.PendingRandomizedAction
+import engine.action.PendingRandomization
 
 data class GameStatePendingRandomization(
     val gameState: GameState,
-    val pendingAction: PendingRandomizedAction? = null
+    val pendingAction: PendingRandomization? = null
 )
 
 fun GameState.noPendingRandomization() =
     GameStatePendingRandomization(this, pendingAction = null)
 
-fun GameState.pendingRandomization(pendingAction: PendingRandomizedAction) =
+fun GameState.pendingRandomization(pendingAction: PendingRandomization) =
     GameStatePendingRandomization(this, pendingAction = pendingAction)
 
-fun GameState.pendingRandomization(pendingActionCreator: GameState.() -> PendingRandomizedAction?) =
+fun GameState.pendingRandomization(pendingActionCreator: GameState.() -> PendingRandomization?) =
     GameStatePendingRandomization(this, pendingAction = this.pendingActionCreator())

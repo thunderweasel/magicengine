@@ -1,6 +1,6 @@
 package engine.model
 
-sealed class RandomRequest<RESULT_TYPE> {
-    data class Shuffle(val cards: List<Card>): RandomRequest<List<Card>>()
-    data class NumberInRange(val range: IntRange): RandomRequest<Int>()
-}
+data class RandomRequest(
+    val shuffles: List<List<Card>> = emptyList(),
+    val randomNumbers: List<IntRange> = emptyList()
+)

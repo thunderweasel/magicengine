@@ -1,10 +1,10 @@
 package engine.random
 
-import engine.action.RandomizationResult
+import engine.action.RandomizedResultAction
+import engine.action.ResolvedRandomization
 import engine.model.Card
 import engine.model.GameState
 import engine.model.GameStatePendingRandomization
-import engine.model.RandomRequest
 import engine.reducer.GameStateReducer
 
 class RandomizationResolver(
@@ -17,15 +17,13 @@ class RandomizationResolver(
         while (true) {
             val pendingAction = resolvingState.pendingAction ?: break
 
-            val randomizationResult = RandomizationResult(
-                values = pendingAction.pendingRandomization.map { request ->
-                    when (request) {
-                        is RandomRequest.Shuffle -> shuffler.shuffle(request.cards)
-                        is RandomRequest.NumberInRange -> randomizer.randomInt(request.range.first, request.range.last)
-                    }
-                }
+            val pendingRandomization = pendingAction.request
+            val resolvedRandomization = ResolvedRandomization(
+                completedShuffles = pendingRandomization.shuffles.map { shuffler.shuffle(it) },
+                generatedNumbers = pendingRandomization.randomNumbers.map { randomizer.randomInt(it.first, it.last) }
             )
-            resolvingState = reducer(randomizationResult, resolvingState)
+            resolvingState =
+                reducer(RandomizedResultAction(pendingAction.actionOnResolution, resolvedRandomization), resolvingState)
         }
 
         return resolvingState.gameState

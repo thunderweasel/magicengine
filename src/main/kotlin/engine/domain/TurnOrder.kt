@@ -36,7 +36,7 @@ fun firstInTurnOrder(
     startingPlayer: PlayerId,
     players: List<PlayerState>,
     filter: (PlayerState) -> Boolean
-) = if (filter(players[startingPlayer])) {
+): PlayerId? = if (filter(players.first { it.id == startingPlayer })) {
     startingPlayer
 } else {
     nextInTurnOrder(startingPlayer, players, filter)

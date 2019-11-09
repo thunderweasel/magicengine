@@ -6,6 +6,7 @@ import engine.action.PlayerAction
 import engine.action.RandomizedResultAction
 import engine.action.RandomizedResultAction.InnerAction.PerformMulligans
 import engine.domain.drawCards
+import engine.domain.firstInTurnOrder
 import engine.domain.nextInTurnOrder
 import engine.model.GameStart.ResolvingMulligans
 import engine.model.GameStart.StartingPlayerMustBeChosen
@@ -58,7 +59,7 @@ private fun mulliganReducer(
                     copy(mulliganDecision = MulliganDecision.WILL_KEEP)
                 },
                 gameStart = mulliganState.copy(
-                    currentChoice = nextUndecidedPlayer(mulliganState, gameState)
+                    currentChoice = nextPlayerAfterMulliganDecision(mulliganState, gameState)
                 )
             ).checkIfAllPlayersDecidedMulligans()
         action is PlayerAction.Mulligan -> {
@@ -71,7 +72,7 @@ private fun mulliganReducer(
                     )
                 },
                 gameStart = mulliganState.copy(
-                    currentChoice = nextUndecidedPlayer(mulliganState, gameState)
+                    currentChoice = nextPlayerAfterMulliganDecision(mulliganState, gameState)
                 )
             ).checkIfAllPlayersDecidedMulligans()
         }
@@ -86,17 +87,23 @@ private fun mulliganReducer(
                                 mulliganDecision = MulliganDecision.UNDECIDED
                             ).drawCards(STARTING_HAND_SIZE)
                         }
-                ),
-                gameStart = mulliganState.copy(
-                    currentChoice = mulliganState.startingPlayer
                 )
-            ).noPendingRandomization()
+            )
+                .run {
+                    copy(
+                        gameStart = mulliganState.copy(
+                            currentChoice = firstInTurnOrder(mulliganState.startingPlayer, players) { it.mulliganDecision == MulliganDecision.UNDECIDED }
+                                ?: TODO("Start the damn game!")
+                        )
+                    )
+                }
+                .noPendingRandomization()
         }
         else -> state
     }
 }
 
-private fun nextUndecidedPlayer(
+private fun nextPlayerAfterMulliganDecision(
     mulliganState: ResolvingMulligans,
     gameState: GameState
 ) =

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
+@DisplayName("Starting the Game")
 class StartingTheGameTest {
     private val engine = MagicEngine(
         shuffler = cheatShuffler,
@@ -30,7 +31,7 @@ class StartingTheGameTest {
 
     // 103.1, 103.2, 103.3 (implicit)
     @Test
-    fun `At the start of the game, decks are shuffled and a random player gets to choose turn order`() {
+    fun `at the start of the game, decks are shuffled and a random player gets to choose turn order`() {
         val gameState = engine.start2PlayerGame(
             deck1 = DeckFactory.alice,
             deck2 = DeckFactory.bob

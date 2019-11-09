@@ -51,7 +51,10 @@ class TurnOrderTest {
 
         @Test
         fun `if the starting player is filtered, return the next unfiltered one`() {
-            assertThat(firstInTurnOrder(1, players) { it.id >= 5 }).isEqualTo(5)
+            assertThat(firstInTurnOrder(1, players) { it.id != 1 }).isEqualTo(3)
+            assertThat(firstInTurnOrder(1, players) { it.id == 5 }).isEqualTo(5)
+            assertThat(firstInTurnOrder(3, players) { it.id == 1 }).isEqualTo(1)
+            assertThat(firstInTurnOrder(5, players) { it.id == 3 }).isEqualTo(3)
         }
     }
 }

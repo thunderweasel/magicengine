@@ -3,7 +3,46 @@ package engine.domain
 import engine.model.PlayerId
 import engine.model.PlayerState
 
-fun nextInTurnOrder(current: PlayerId, players: List<PlayerState>): PlayerId {
-    val nextIndex = (1 + players.indexOfFirst { it.id == current }) % players.size
+fun nextInTurnOrder(
+    current: PlayerId,
+    players: List<PlayerState>
+): PlayerId {
+    val indexOfCurrent = players.indexOfFirst { it.id == current }
+    require(indexOfCurrent != -1) { "current ID $current not in players: $players" }
+    return players[getNextIndex(indexOfCurrent, players)].id
+}
+
+fun nextInTurnOrder(
+    current: PlayerId,
+    players: List<PlayerState>,
+    filter: (PlayerState) -> Boolean
+): PlayerId? {
+    val indexOfCurrent = players.indexOfFirst { it.id == current }
+    require(indexOfCurrent != -1) { "current ID $current not in players: $players" }
+
+    if (players.none(filter)) {
+        return null
+    }
+
+    var nextIndex = getNextIndex(indexOfCurrent, players)
+    while (!filter(players[nextIndex])) {
+        nextIndex = getNextIndex(nextIndex, players)
+    }
+
     return players[nextIndex].id
 }
+
+fun firstInTurnOrder(
+    startingPlayer: PlayerId,
+    players: List<PlayerState>,
+    filter: (PlayerState) -> Boolean
+) = if (filter(players[startingPlayer])) {
+    startingPlayer
+} else {
+    nextInTurnOrder(startingPlayer, players, filter)
+}
+
+private fun getNextIndex(
+    currentIndex: Int,
+    players: List<PlayerState>
+) = (currentIndex + 1) % players.size

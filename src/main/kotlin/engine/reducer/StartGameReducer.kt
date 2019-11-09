@@ -22,9 +22,9 @@ import engine.model.pendingRandomization
 
 private const val STARTING_HAND_SIZE = 7
 
-val gameStartStateReducer: GameStateReducer = { action, state ->
+val gameStartStateReducer: GameStatePendingRandomizationReducer = { action, state ->
     when (val gameStart = state.gameState.gameStart) {
-        is StartingPlayerMustBeChosen -> firstPlayerMustBeChosenStateReduce(action, state)
+        is StartingPlayerMustBeChosen -> firstPlayerMustBeChosenStateReduce(action, state.gameState)
         is ResolvingMulligans -> mulliganStateReduce(action, state, gameStart)
         else -> state
     }
@@ -32,35 +32,32 @@ val gameStartStateReducer: GameStateReducer = { action, state ->
 
 private fun firstPlayerMustBeChosenStateReduce(
     action: GameAction,
-    state: GameStatePendingRandomization
+    state: GameState
 ): GameStatePendingRandomization =
     when (action) {
         is PlayerAction.ChooseFirstPlayer -> drawOpeningHands(state, action)
         else -> state
-    }
+    }.noPendingRandomization()
 
 private fun drawOpeningHands(
-    state: GameStatePendingRandomization,
+    state: GameState,
     action: PlayerAction.ChooseFirstPlayer
-): GameStatePendingRandomization {
-    return state.copy(
-        gameState = state.gameState.copy(
-            players = state.gameState.players.map { it.drawCards(STARTING_HAND_SIZE) },
-            gameStart = ResolvingMulligans(
-                numberOfMulligans = 0,
-                startingPlayer = action.chosenPlayer,
-                currentChoice = action.chosenPlayer
-            )
+): GameState =
+    state.copy(
+        players = state.players.map { it.drawCards(STARTING_HAND_SIZE) },
+        gameStart = ResolvingMulligans(
+            numberOfMulligans = 0,
+            startingPlayer = action.chosenPlayer,
+            currentChoice = action.chosenPlayer
         )
     )
-}
 
 private fun mulliganStateReduce(
     action: GameAction,
-    statePendingRandomization: GameStatePendingRandomization,
+    state: GameStatePendingRandomization,
     mulliganState: ResolvingMulligans
 ): GameStatePendingRandomization {
-    val gameState = statePendingRandomization.gameState
+    val gameState = state.gameState
     return when {
         action is PlayerAction.KeepHand ->
             gameState.makeDecision(mulliganState, MulliganDecision.KEEP)
@@ -72,10 +69,11 @@ private fun mulliganStateReduce(
                 .checkIfAllPlayersDecidedMulligans(mulliganState)
         }
         action is RandomizedResultAction && action.innerAction == PerformMulligans -> {
-            statePendingRandomization.performMulligans(action)
+            gameState.performMulligans(action)
                 .eachPlayerWhoMulledDecidesWhetherToKeepAgain(mulliganState)
+                .noPendingRandomization()
         }
-        else -> statePendingRandomization
+        else -> state
     }
 }
 
@@ -118,12 +116,12 @@ private fun GameState.putCardsOnBottom(
     }
 )
 
-private fun GameStatePendingRandomization.performMulligans(
+private fun GameState.performMulligans(
     action: RandomizedResultAction
-) = gameState.copy(
-    players = gameState.players.replacePlayerStates(
+): GameState = copy(
+    players = players.replacePlayerStates(
         action.resolvedRandomization.completedShuffles
-            .zip(gameState.players.filter(mulled))
+            .zip(players.filter(mulled))
             .map { (completedShuffle, playerState) ->
                 playerState
                     .copy(
@@ -135,7 +133,7 @@ private fun GameStatePendingRandomization.performMulligans(
     )
 )
 
-private fun GameState.eachPlayerWhoMulledDecidesWhetherToKeepAgain(mulliganState: ResolvingMulligans) =
+private fun GameState.eachPlayerWhoMulledDecidesWhetherToKeepAgain(mulliganState: ResolvingMulligans): GameState =
     copy(
         gameStart = mulliganState.copy(
             numberOfMulligans = mulliganState.numberOfMulligans + 1,
@@ -145,7 +143,7 @@ private fun GameState.eachPlayerWhoMulledDecidesWhetherToKeepAgain(mulliganState
             ) { it.mulliganDecision == MulliganDecision.UNDECIDED }
                 ?: throw IllegalStateException("Unexpected state: no players undecided after performing mulligans")
         )
-    ).noPendingRandomization()
+    )
 
 private fun nextPlayerAfterMulliganDecision(
     gameState: GameState,
@@ -160,7 +158,7 @@ private fun nextPlayerAfterMulliganDecision(
 private fun GameState.checkIfAllPlayersDecidedMulligans(mulliganState: ResolvingMulligans): GameStatePendingRandomization =
     when {
         players.all(kept) ->
-            startTheGame(mulliganState)
+            startTheGame(mulliganState).noPendingRandomization()
         players.any(undecided) ->
             // do nothing
             this.noPendingRandomization()
@@ -168,22 +166,19 @@ private fun GameState.checkIfAllPlayersDecidedMulligans(mulliganState: Resolving
             requestRandomizationForPlayersToShuffleDecks()
     }
 
-private fun GameState.startTheGame(mulliganState: ResolvingMulligans): GameStatePendingRandomization {
-    return copy(
-        gameStart = GameStart.GameStarted(startingPlayer = mulliganState.startingPlayer)
-    ).noPendingRandomization()
-}
+private fun GameState.startTheGame(mulliganState: ResolvingMulligans): GameState = copy(
+    gameStart = GameStart.GameStarted(startingPlayer = mulliganState.startingPlayer)
+)
 
-private fun GameState.requestRandomizationForPlayersToShuffleDecks(): GameStatePendingRandomization {
-    return pendingRandomization(
+private fun GameState.requestRandomizationForPlayersToShuffleDecks(): GameStatePendingRandomization =
+    pendingRandomization(
         PendingRandomization(
             actionOnResolution = PerformMulligans,
             request = RandomRequest(
-                shuffles = players.filter(mulled).map { it.library }
+                shuffles = players.filter(mulled).map(PlayerState::library)
             )
         )
     )
-}
 
 private val kept = { it: PlayerState -> it.mulliganDecision == MulliganDecision.KEEP }
 private val mulled = { it: PlayerState -> it.mulliganDecision == MulliganDecision.MULLIGAN }

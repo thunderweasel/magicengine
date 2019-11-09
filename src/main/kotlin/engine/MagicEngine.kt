@@ -10,15 +10,15 @@ import engine.random.RandomShuffler
 import engine.random.RandomizationResolver
 import engine.random.Randomizer
 import engine.random.Shuffler
-import engine.reducer.GameStateReducer
-import engine.reducer.reduceGameState
+import engine.reducer.GameStatePendingRandomizationReducer
+import engine.reducer.masterReducer
 
 class MagicEngine(
     val shuffler: Shuffler<Card> = RandomShuffler(),
     val randomizer: Randomizer = ActualRandomizer(),
-    val reducer: GameStateReducer = ::reduceGameState
+    val reducer: GameStatePendingRandomizationReducer = masterReducer()
 ) {
-    private val randomizationResolver = RandomizationResolver(
+    private val randomizationResolver = RandomizationResolver<GameState>(
         shuffler = shuffler,
         randomizer = randomizer,
         reducer = reducer

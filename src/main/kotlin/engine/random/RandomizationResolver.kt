@@ -1,19 +1,18 @@
 package engine.random
 
+import engine.action.GameAction
 import engine.action.RandomizedResultAction
 import engine.action.ResolvedRandomization
 import engine.model.Card
-import engine.model.GameState
-import engine.model.GameStatePendingRandomization
-import engine.reducer.GameStateReducer
+import engine.model.StatePendingRandomization
 
-class RandomizationResolver(
-    val reducer: GameStateReducer,
+class RandomizationResolver<T>(
+    val reducer: (GameAction, StatePendingRandomization<T>) -> StatePendingRandomization<T>,
     val shuffler: Shuffler<Card>,
     val randomizer: Randomizer
 ) {
-    fun resolve(state: GameStatePendingRandomization): GameState {
-        var resolvingState: GameStatePendingRandomization = state
+    fun resolve(state: StatePendingRandomization<T>): T {
+        var resolvingState: StatePendingRandomization<T> = state
         while (true) {
             val pendingAction = resolvingState.pendingAction ?: break
 

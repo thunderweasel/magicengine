@@ -11,7 +11,9 @@ import engine.model.GameStart.ResolvingMulligans
 import engine.model.GameState
 import engine.model.MulliganDecision
 import engine.model.PlayerState
+import engine.random.CheatShuffler
 import engine.random.FakeRandomizer
+import engine.random.ShuffleCheat
 import engine.random.Shuffler
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -111,17 +113,9 @@ class StartingTheGameTest {
     }
 }
 
-// Instead of actually shuffling, we'll just move the first card from the beginning to the end
-private val cheatShuffler = object : Shuffler<Card> {
-    override fun shuffle(cards: List<Card>) = cards.drop(1).plus(cards[0])
-}
-
-private fun List<Card>.shuffle(times: Int = 1): List<Card> {
-    var cards = this
-    for(i in 1..times) {
-        cards = cheatShuffler.shuffle(cards)
-    }
-    return cards
+private val cheatShuffler = CheatShuffler<Card>(ShuffleCheat.MoveOneCardToBottom)
+private fun List<Card>.shuffle(times: Int = 1) = (1..times).fold(this) { cards, _ ->
+    cheatShuffler.shuffle(cards)
 }
 
 private object States {

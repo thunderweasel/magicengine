@@ -1,7 +1,7 @@
 package engine.random
 
 class FakeRandomizer(
-    private val randomValues: List<Int>
+    private var randomValues: List<Int> = emptyList()
 ) : Randomizer {
     private var next = 0
 

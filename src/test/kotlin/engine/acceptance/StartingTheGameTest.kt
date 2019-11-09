@@ -1,19 +1,22 @@
 package engine.acceptance
 
-import engine.action.PlayerAction
 import engine.MagicEngine
+import engine.action.PlayerAction
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
-import engine.model.*
+import engine.model.Card
 import engine.model.GameStart.FirstPlayerMustBeChosenBy
 import engine.model.GameStart.ResolvingMulligans
+import engine.model.GameState
+import engine.model.MulliganDecision
+import engine.model.PlayerState
 import engine.random.FakeRandomizer
 import engine.random.Shuffler
-import io.kotlintest.shouldBe
-import io.kotlintest.specs.StringSpec
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
-class StartingTheGameTest : StringSpec({
-    val engine = MagicEngine(
+class StartingTheGameTest {
+    private val engine = MagicEngine(
         shuffler = cheatShuffler,
         // Feeding fake values for random choices
         randomizer = FakeRandomizer(
@@ -24,17 +27,19 @@ class StartingTheGameTest : StringSpec({
     )
 
     // 103.1, 103.2, 103.3 (implicit)
-    "At the start of the game, decks are shuffled and a random player gets to choose turn order" {
+    @Test
+    fun `At the start of the game, decks are shuffled and a random player gets to choose turn order`() {
         val gameState = engine.start2PlayerGame(
             deck1 = DeckFactory.alice,
             deck2 = DeckFactory.bob
         )
 
-        gameState shouldBe States.aliceWinsCoinToss
+        assertThat(gameState).isEqualTo(States.aliceWinsCoinToss)
     }
 
     // 103.4 (part 1)
-    "once turn order is resolved, each player draws their starting hand" {
+    @Test
+    fun `once turn order is resolved, each player draws their starting hand`() {
         // Alice chooses to be on the draw
         val gameState = engine.performAction(
             PlayerAction.ChooseFirstPlayer(
@@ -42,31 +47,33 @@ class StartingTheGameTest : StringSpec({
             ),
             States.aliceWinsCoinToss)
 
-        gameState shouldBe States.drawnFirstHands
+        assertThat(gameState).isEqualTo(States.drawnFirstHands)
     }
 
     // 103.4 (part 2)
-    "the starting player decides whether to keep or mulligan first" {
+    @Test
+    fun `the starting player decides whether to keep or mulligan first`() {
         // Bob decides to keep
         val gameState = engine.performAction(
             PlayerAction.KeepHand,
             States.drawnFirstHands
         )
 
-        gameState shouldBe States.bobDecidedToKeep
+        assertThat(gameState).isEqualTo(States.bobDecidedToKeep)
     }
 
     // 103.4 (part 3)
-    "then the next player chooses whether to mulligan, after which both players will mulligan simultaneously (if desired)" {
+    @Test
+    fun `then the next player chooses whether to mulligan, after which both players will mulligan simultaneously (if desired)`() {
         // Alice decides to mulligan
         val gameState = engine.performAction(
             PlayerAction.Mulligan,
             States.bobDecidedToKeep
         )
 
-        gameState shouldBe States.aliceDecidedToMulligan1
+        assertThat(gameState).isEqualTo(States.aliceDecidedToMulligan1)
     }
-})
+}
 
 // Instead of actually shuffling, we'll just move the first card from the beginning to the end
 private val cheatShuffler = object : Shuffler<Card> {

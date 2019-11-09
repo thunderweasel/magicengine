@@ -1,22 +1,24 @@
 package engine.domain
 
 import engine.factories.PlayerStateFactory
-import io.kotlintest.shouldBe
-import io.kotlintest.specs.StringSpec
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
-class TurnOrderTest : StringSpec({
-    val players = listOf(
+class TurnOrderTest {
+    private val players = listOf(
         PlayerStateFactory.create(1),
         PlayerStateFactory.create(3),
         PlayerStateFactory.create(5)
     )
 
-    "if not at end of list, just go to next one" {
-        nextInTurnOrder(1, players) shouldBe 3
-        nextInTurnOrder(3, players) shouldBe 5
+    @Test
+    fun `if not at end of list, just go to next one`() {
+        assertThat(nextInTurnOrder(1, players)).isEqualTo(3)
+        assertThat(nextInTurnOrder(3, players)).isEqualTo(5)
     }
 
-    "if at end of list, loop back to beginning" {
-        nextInTurnOrder(5, players) shouldBe 1
+    @Test
+    fun `if at end of list, loop back to beginning`() {
+        assertThat(nextInTurnOrder(5, players)).isEqualTo(1)
     }
-})
+}

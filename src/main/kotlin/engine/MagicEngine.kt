@@ -2,15 +2,16 @@ package engine
 
 import engine.action.PlayerAction
 import engine.domain.startingState
-import engine.model.*
-import engine.reducer.reduceGameState
+import engine.model.Card
+import engine.model.GameState
+import engine.model.noPendingRandomization
 import engine.random.ActualRandomizer
 import engine.random.RandomShuffler
+import engine.random.RandomizationResolver
 import engine.random.Randomizer
 import engine.random.Shuffler
-import engine.model.noPendingRandomization
-import engine.random.RandomizationResolver
 import engine.reducer.GameStateReducer
+import engine.reducer.reduceGameState
 
 class MagicEngine(
     val shuffler: Shuffler<Card> = RandomShuffler(),

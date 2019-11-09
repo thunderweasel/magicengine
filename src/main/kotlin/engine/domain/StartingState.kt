@@ -1,7 +1,11 @@
 package engine.domain
 
-import engine.model.*
+import engine.model.Card
 import engine.model.GameStart.FirstPlayerMustBeChosenBy
+import engine.model.GameState
+import engine.model.MulliganDecision
+import engine.model.PlayerId
+import engine.model.PlayerState
 
 fun startingState(
     shuffledPlayerDecks: List<List<Card>>,

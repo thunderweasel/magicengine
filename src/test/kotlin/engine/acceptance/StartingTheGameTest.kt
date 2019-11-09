@@ -85,7 +85,7 @@ class StartingTheGameTest {
         @Test
         fun `Bob decides to keep after first mulligan`() {
             val gameState = engine.performAction(
-                PlayerAction.KeepHand,
+                PlayerAction.KeepHand(toBottom = listOf(3)), // 4th card to the bottom
                 States.bothPlayersTookFirstMulligan
             )
             assertThat(gameState).isEqualTo(States.bobDecidedToKeepAfterFirstMulligan)
@@ -103,7 +103,7 @@ class StartingTheGameTest {
         @Test
         fun `Alice keeps after second mulligan`() {
             val gameState2 = engine.performAction(
-                PlayerAction.KeepHand,
+                PlayerAction.KeepHand(toBottom = listOf(4, 5)), // 5th and 6th card to the bottom
                 States.aliceTookSecondMulligan
             )
             assertThat(gameState2).isEqualTo(States.mulligansResolved)
@@ -171,6 +171,7 @@ private object States {
                 )
             ),
             gameStart = ResolvingMulligans(
+                numberOfMulligans = 0,
                 startingPlayer = PlayerStateFactory.ID_BOB,
                 currentChoice = PlayerStateFactory.ID_BOB
             )
@@ -180,22 +181,18 @@ private object States {
     val bobDecidedToTakeFirstMulligan by lazy {
         GameState(
             players = listOf(
-                PlayerState(
-                    id = PlayerStateFactory.ID_ALICE,
-                    library = DeckFactory.alice.shuffle(1).minus(elements = expectedAliceHand1),
-                    lifeTotal = 20,
-                    hand = expectedAliceHand1,
-                    mulliganDecision = MulliganDecision.UNDECIDED
-                ),
+                // Alice is unchanged
+                drawnFirstHands.players[0],
                 PlayerState(
                     id = PlayerStateFactory.ID_BOB,
                     library = DeckFactory.bob.shuffle(1),
                     lifeTotal = 20,
                     hand = emptyList(),
-                    mulliganDecision = MulliganDecision.WILL_MULLIGAN
+                    mulliganDecision = MulliganDecision.MULLIGAN
                 )
             ),
             gameStart = ResolvingMulligans(
+                numberOfMulligans = 0,
                 startingPlayer = PlayerStateFactory.ID_BOB,
                 currentChoice = PlayerStateFactory.ID_ALICE
             )
@@ -224,6 +221,7 @@ private object States {
                 )
             ),
             gameStart = ResolvingMulligans(
+                numberOfMulligans = 1,
                 startingPlayer = PlayerStateFactory.ID_BOB,
                 currentChoice = PlayerStateFactory.ID_BOB
             )
@@ -233,23 +231,22 @@ private object States {
     val bobDecidedToKeepAfterFirstMulligan by lazy {
         GameState(
             players = listOf(
-                PlayerState(
-                    id = PlayerStateFactory.ID_ALICE,
-                    lifeTotal = 20,
-                    hand = expectedAliceHand2,
-                    library = DeckFactory.alice.shuffle(2).minus(elements = expectedAliceHand2),
-                    mulliganDecision = MulliganDecision.UNDECIDED
-                ),
+                // Alice is unchanged
+                bothPlayersTookFirstMulligan.players[0],
                 PlayerState(
                     id = PlayerStateFactory.ID_BOB,
                     lifeTotal = 20,
-                    // Bob should still have same hand, since he kept
-                    hand = expectedBobHand2,
-                    library = DeckFactory.bob.shuffle(2).minus(elements = expectedBobHand2),
-                    mulliganDecision = MulliganDecision.WILL_KEEP
+                    // Bob put the card at index 3 to the bottom
+                    hand = expectedBobHand2.minus(expectedBobHand2[3]),
+                    library = DeckFactory.bob
+                        .shuffle(2)
+                        .minus(expectedBobHand2)
+                        .plus(expectedBobHand2[3]),
+                    mulliganDecision = MulliganDecision.KEEP
                 )
             ),
             gameStart = ResolvingMulligans(
+                numberOfMulligans = 1,
                 startingPlayer = PlayerStateFactory.ID_BOB,
                 currentChoice = PlayerStateFactory.ID_ALICE
             )
@@ -264,18 +261,14 @@ private object States {
                     lifeTotal = 20,
                     // Alice draws her third hand
                     hand = expectedAliceHand3,
-                    library = DeckFactory.alice.shuffle(3).minus(elements = expectedAliceHand3),
+                    library = DeckFactory.alice.shuffle(3).minus(expectedAliceHand3),
                     mulliganDecision = MulliganDecision.UNDECIDED
                 ),
-                PlayerState(
-                    id = PlayerStateFactory.ID_BOB,
-                    lifeTotal = 20,
-                    hand = expectedBobHand2,
-                    library = DeckFactory.bob.shuffle(2).minus(elements = expectedBobHand2),
-                    mulliganDecision = MulliganDecision.WILL_KEEP
-                )
+                // Bob is unchanged
+                bobDecidedToKeepAfterFirstMulligan.players[1]
             ),
             gameStart = ResolvingMulligans(
+                numberOfMulligans = 2,
                 startingPlayer = PlayerStateFactory.ID_BOB,
                 currentChoice = PlayerStateFactory.ID_ALICE
             )
@@ -288,17 +281,16 @@ private object States {
                 PlayerState(
                     id = PlayerStateFactory.ID_ALICE,
                     lifeTotal = 20,
-                    hand = expectedAliceHand3,
-                    library = DeckFactory.alice.shuffle(3).minus(elements = expectedAliceHand3),
-                    mulliganDecision = MulliganDecision.WILL_KEEP
+                    // Alice put the cards at index 4 and 5 to the bottom
+                    hand = expectedAliceHand3.minus(expectedAliceHand3.slice(4..5)),
+                    library = DeckFactory.alice
+                        .shuffle(3)
+                        .minus(elements = expectedAliceHand3)
+                        .plus(expectedAliceHand3.slice(4..5)),
+                    mulliganDecision = MulliganDecision.KEEP
                 ),
-                PlayerState(
-                    id = PlayerStateFactory.ID_BOB,
-                    lifeTotal = 20,
-                    hand = expectedBobHand2,
-                    library = DeckFactory.bob.shuffle(2).minus(elements = expectedBobHand2),
-                    mulliganDecision = MulliganDecision.WILL_KEEP
-                )
+                // Bob is unchanged
+                aliceTookSecondMulligan.players[1]
             ),
             gameStart = GameStart.GameStarted(startingPlayer = PlayerStateFactory.ID_BOB)
         )

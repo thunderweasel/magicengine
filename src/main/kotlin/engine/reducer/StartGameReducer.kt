@@ -23,100 +23,133 @@ import engine.model.pendingRandomization
 private const val STARTING_HAND_SIZE = 7
 
 val gameStartStateReducer: GameStateReducer = { action, state ->
-    when (state.gameState.gameStart) {
-        is StartingPlayerMustBeChosen -> firstPlayerMustBeChosenReducer(action, state)
-        is ResolvingMulligans -> mulliganReducer(action, state, state.gameState.gameStart)
+    when (val gameStart = state.gameState.gameStart) {
+        is StartingPlayerMustBeChosen -> firstPlayerMustBeChosenStateReduce(action, state)
+        is ResolvingMulligans -> mulliganStateReduce(action, state, gameStart)
         else -> state
     }
 }
 
-private fun firstPlayerMustBeChosenReducer(
+private fun firstPlayerMustBeChosenStateReduce(
     action: GameAction,
     state: GameStatePendingRandomization
 ): GameStatePendingRandomization =
     when (action) {
-        is PlayerAction.ChooseFirstPlayer -> state.copy(
-            gameState = state.gameState.copy(
-                players = state.gameState.players.map { it.drawCards(STARTING_HAND_SIZE) },
-                gameStart = ResolvingMulligans(
-                    startingPlayer = action.chosenPlayer,
-                    currentChoice = action.chosenPlayer
-                )
-            )
-        )
+        is PlayerAction.ChooseFirstPlayer -> drawOpeningHands(state, action)
         else -> state
     }
 
-private fun mulliganReducer(
-    action: GameAction,
+private fun drawOpeningHands(
     state: GameStatePendingRandomization,
+    action: PlayerAction.ChooseFirstPlayer
+): GameStatePendingRandomization {
+    return state.copy(
+        gameState = state.gameState.copy(
+            players = state.gameState.players.map { it.drawCards(STARTING_HAND_SIZE) },
+            gameStart = ResolvingMulligans(
+                numberOfMulligans = 0,
+                startingPlayer = action.chosenPlayer,
+                currentChoice = action.chosenPlayer
+            )
+        )
+    )
+}
+
+private fun mulliganStateReduce(
+    action: GameAction,
+    statePendingRandomization: GameStatePendingRandomization,
     mulliganState: ResolvingMulligans
 ): GameStatePendingRandomization {
-    val gameState = state.gameState
+    val gameState = statePendingRandomization.gameState
     return when {
         action is PlayerAction.KeepHand ->
-            gameState.copy(
-                players = gameState.replacePlayerState(id = mulliganState.currentChoice) {
-                    copy(mulliganDecision = MulliganDecision.WILL_KEEP)
-                },
-                gameStart = mulliganState.copy(
-                    currentChoice = nextPlayerAfterMulliganDecision(mulliganState, gameState)
-                )
-            ).checkIfAllPlayersDecidedMulligans()
+            gameState.makeDecision(mulliganState, MulliganDecision.KEEP)
+                .putCardsOnBottom(playerId = mulliganState.currentChoice, toBottom = action.toBottom)
+                .checkIfAllPlayersDecidedMulligans(mulliganState)
         action is PlayerAction.Mulligan -> {
-            gameState.copy(
-                players = gameState.replacePlayerState(mulliganState.currentChoice) {
-                    copy(
-                        mulliganDecision = MulliganDecision.WILL_MULLIGAN,
-                        hand = emptyList(),
-                        library = hand.plus(library)
-                    )
-                },
-                gameStart = mulliganState.copy(
-                    currentChoice = nextPlayerAfterMulliganDecision(mulliganState, gameState)
-                )
-            ).checkIfAllPlayersDecidedMulligans()
+            gameState.makeDecision(mulliganState, MulliganDecision.MULLIGAN)
+                .putHandBack(playerId = mulliganState.currentChoice)
+                .checkIfAllPlayersDecidedMulligans(mulliganState)
         }
         action is RandomizedResultAction && action.innerAction == PerformMulligans -> {
-            state.gameState.copy(
-                players = state.gameState.players.replacePlayerStates(
-                    action.resolvedRandomization.completedShuffles
-                        .zip(state.gameState.players.filter(whoMulled))
-                        .map { (completedShuffle, playerState) ->
-                            playerState.copy(
-                                library = completedShuffle,
-                                mulliganDecision = MulliganDecision.UNDECIDED
-                            ).drawCards(STARTING_HAND_SIZE)
-                        }
-                )
-            )
-                .run {
-                    val nextToDecide = firstInTurnOrder(
-                        mulliganState.startingPlayer,
-                        players
-                    ) { it.mulliganDecision == MulliganDecision.UNDECIDED }
-                    copy(
-                        gameStart = if (nextToDecide != null) {
-                            mulliganState.copy(
-                                currentChoice = nextToDecide
-                            )
-                        } else {
-                            GameStart.GameStarted(
-                                startingPlayer = mulliganState.startingPlayer
-                            )
-                        }
-                    )
-
-                }
-                .noPendingRandomization()
+            statePendingRandomization.performMulligans(action)
+                .eachPlayerWhoMulledDecidesWhetherToKeepAgain(mulliganState)
         }
-        else -> state
+        else -> statePendingRandomization
     }
 }
 
-private fun nextPlayerAfterMulliganDecision(
+private fun GameState.makeDecision(
     mulliganState: ResolvingMulligans,
-    gameState: GameState
+    mulliganDecision: MulliganDecision
+): GameState {
+    return copy(
+        players = replacePlayerState(id = mulliganState.currentChoice) {
+            copy(
+                mulliganDecision = mulliganDecision
+            )
+        },
+        gameStart = mulliganState.copy(
+            currentChoice = nextPlayerAfterMulliganDecision(this, mulliganState)
+        )
+    )
+}
+
+private fun GameState.putHandBack(
+    playerId: PlayerId
+): GameState = copy(
+    players = replacePlayerState(playerId) {
+        copy(
+            hand = emptyList(),
+            library = hand.plus(library)
+        )
+    }
+)
+
+private fun GameState.putCardsOnBottom(
+    playerId: PlayerId,
+    toBottom: List<Int>
+): GameState = copy(
+    players = replacePlayerState(playerId) {
+        copy(
+            hand = hand.filterIndexed { index, _ -> !toBottom.contains(index) },
+            library = library.plus(hand.slice(toBottom))
+        )
+    }
+)
+
+private fun GameStatePendingRandomization.performMulligans(
+    action: RandomizedResultAction
+) = gameState.copy(
+    players = gameState.players.replacePlayerStates(
+        action.resolvedRandomization.completedShuffles
+            .zip(gameState.players.filter(mulled))
+            .map { (completedShuffle, playerState) ->
+                playerState
+                    .copy(
+                        library = completedShuffle,
+                        mulliganDecision = MulliganDecision.UNDECIDED
+                    )
+                    .drawCards(STARTING_HAND_SIZE)
+            }
+    )
+)
+
+private fun GameState.eachPlayerWhoMulledDecidesWhetherToKeepAgain(mulliganState: ResolvingMulligans) =
+    copy(
+        gameStart = mulliganState.copy(
+            numberOfMulligans = mulliganState.numberOfMulligans + 1,
+            currentChoice = firstInTurnOrder(
+                mulliganState.startingPlayer,
+                players
+            ) { it.mulliganDecision == MulliganDecision.UNDECIDED }
+                ?: throw IllegalStateException("Unexpected state: no players undecided after performing mulligans")
+        )
+    ).noPendingRandomization()
+
+private fun nextPlayerAfterMulliganDecision(
+    gameState: GameState,
+    mulliganState: ResolvingMulligans
 ) =
     nextInTurnOrder(
         mulliganState.currentChoice,
@@ -124,21 +157,36 @@ private fun nextPlayerAfterMulliganDecision(
     ) { it.mulliganDecision == MulliganDecision.UNDECIDED }
         ?: mulliganState.startingPlayer
 
-private fun GameState.checkIfAllPlayersDecidedMulligans(): GameStatePendingRandomization =
-    pendingRandomization {
-        if (players.any(undecided)) {
-            null
-        } else {
-            PendingRandomization(
-                actionOnResolution = PerformMulligans,
-                request = RandomRequest(
-                    shuffles = players.filter(whoMulled).map { it.library }
-                )
-            )
-        }
+private fun GameState.checkIfAllPlayersDecidedMulligans(mulliganState: ResolvingMulligans): GameStatePendingRandomization =
+    when {
+        players.all(kept) ->
+            startTheGame(mulliganState)
+        players.any(undecided) ->
+            // do nothing
+            this.noPendingRandomization()
+        else ->
+            requestRandomizationForPlayersToShuffleDecks()
     }
 
-private val whoMulled = { it: PlayerState -> it.mulliganDecision == MulliganDecision.WILL_MULLIGAN }
+private fun GameState.startTheGame(mulliganState: ResolvingMulligans): GameStatePendingRandomization {
+    return copy(
+        gameStart = GameStart.GameStarted(startingPlayer = mulliganState.startingPlayer)
+    ).noPendingRandomization()
+}
+
+private fun GameState.requestRandomizationForPlayersToShuffleDecks(): GameStatePendingRandomization {
+    return pendingRandomization(
+        PendingRandomization(
+            actionOnResolution = PerformMulligans,
+            request = RandomRequest(
+                shuffles = players.filter(mulled).map { it.library }
+            )
+        )
+    )
+}
+
+private val kept = { it: PlayerState -> it.mulliganDecision == MulliganDecision.KEEP }
+private val mulled = { it: PlayerState -> it.mulliganDecision == MulliganDecision.MULLIGAN }
 private val undecided = { it: PlayerState -> it.mulliganDecision == MulliganDecision.UNDECIDED }
 
 private inline fun GameState.replacePlayerState(
@@ -157,3 +205,4 @@ private fun List<PlayerState>.replacePlayerStates(
 ) = map { existingPlayer ->
     playersToReplace.firstOrNull { it.id == existingPlayer.id } ?: existingPlayer
 }
+

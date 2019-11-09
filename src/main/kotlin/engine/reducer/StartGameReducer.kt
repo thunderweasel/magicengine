@@ -8,6 +8,7 @@ import engine.action.RandomizedResultAction.InnerAction.PerformMulligans
 import engine.domain.drawCards
 import engine.domain.firstInTurnOrder
 import engine.domain.nextInTurnOrder
+import engine.model.GameStart
 import engine.model.GameStart.ResolvingMulligans
 import engine.model.GameStart.StartingPlayerMustBeChosen
 import engine.model.GameState
@@ -90,12 +91,22 @@ private fun mulliganReducer(
                 )
             )
                 .run {
+                    val nextToDecide = firstInTurnOrder(
+                        mulliganState.startingPlayer,
+                        players
+                    ) { it.mulliganDecision == MulliganDecision.UNDECIDED }
                     copy(
-                        gameStart = mulliganState.copy(
-                            currentChoice = firstInTurnOrder(mulliganState.startingPlayer, players) { it.mulliganDecision == MulliganDecision.UNDECIDED }
-                                ?: TODO("Start the damn game!")
-                        )
+                        gameStart = if (nextToDecide != null) {
+                            mulliganState.copy(
+                                currentChoice = nextToDecide
+                            )
+                        } else {
+                            GameStart.GameStarted(
+                                startingPlayer = mulliganState.startingPlayer
+                            )
+                        }
                     )
+
                 }
                 .noPendingRandomization()
         }
@@ -107,7 +118,10 @@ private fun nextPlayerAfterMulliganDecision(
     mulliganState: ResolvingMulligans,
     gameState: GameState
 ) =
-    nextInTurnOrder(mulliganState.currentChoice, gameState.players) { it.mulliganDecision == MulliganDecision.UNDECIDED }
+    nextInTurnOrder(
+        mulliganState.currentChoice,
+        gameState.players
+    ) { it.mulliganDecision == MulliganDecision.UNDECIDED }
         ?: mulliganState.startingPlayer
 
 private fun GameState.checkIfAllPlayersDecidedMulligans(): GameStatePendingRandomization =

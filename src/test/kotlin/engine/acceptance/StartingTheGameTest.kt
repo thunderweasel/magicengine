@@ -5,6 +5,7 @@ import engine.action.PlayerAction
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
 import engine.model.Card
+import engine.model.GameStart
 import engine.model.GameStart.StartingPlayerMustBeChosen
 import engine.model.GameStart.ResolvingMulligans
 import engine.model.GameState
@@ -97,6 +98,15 @@ class StartingTheGameTest {
                 States.bobDecidedToKeepAfterFirstMulligan
             )
             assertThat(gameState2).isEqualTo(States.aliceTookSecondMulligan)
+        }
+
+        @Test
+        fun `Alice keeps after second mulligan`() {
+            val gameState2 = engine.performAction(
+                PlayerAction.KeepHand,
+                States.aliceTookSecondMulligan
+            )
+            assertThat(gameState2).isEqualTo(States.mulligansResolved)
         }
     }
 }
@@ -269,6 +279,28 @@ private object States {
                 startingPlayer = PlayerStateFactory.ID_BOB,
                 currentChoice = PlayerStateFactory.ID_ALICE
             )
+        )
+    }
+
+    val mulligansResolved by lazy {
+        GameState(
+            players = listOf(
+                PlayerState(
+                    id = PlayerStateFactory.ID_ALICE,
+                    lifeTotal = 20,
+                    hand = expectedAliceHand3,
+                    library = DeckFactory.alice.shuffle(3).minus(elements = expectedAliceHand3),
+                    mulliganDecision = MulliganDecision.WILL_KEEP
+                ),
+                PlayerState(
+                    id = PlayerStateFactory.ID_BOB,
+                    lifeTotal = 20,
+                    hand = expectedBobHand2,
+                    library = DeckFactory.bob.shuffle(2).minus(elements = expectedBobHand2),
+                    mulliganDecision = MulliganDecision.WILL_KEEP
+                )
+            ),
+            gameStart = GameStart.GameStarted(startingPlayer = PlayerStateFactory.ID_BOB)
         )
     }
 }

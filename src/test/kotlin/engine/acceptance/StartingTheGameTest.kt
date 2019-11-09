@@ -9,6 +9,7 @@ import engine.model.GameStart
 import engine.model.GameStart.StartingPlayerMustBeChosen
 import engine.model.GameStart.ResolvingMulligans
 import engine.model.GameState
+import engine.model.InvalidPlayerAction
 import engine.model.MulliganDecision
 import engine.model.PlayerState
 import engine.random.CheatShuffler
@@ -16,6 +17,7 @@ import engine.random.FakeRandomizer
 import engine.random.ShuffleCheat
 import engine.random.Shuffler
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -109,6 +111,22 @@ class StartingTheGameTest {
                 States.aliceTookSecondMulligan
             )
             assertThat(gameState2).isEqualTo(States.mulligansResolved)
+        }
+
+        @Test
+        fun `if Alice tries to put the wrong number of cards on the bottom it fails`() {
+            assertThatThrownBy {
+                engine.performAction(
+                    PlayerAction.KeepHand(toBottom = listOf(1, 4, 5)),
+                    States.aliceTookSecondMulligan
+                )
+            }.isEqualTo(
+                InvalidPlayerAction(
+                    action = PlayerAction.KeepHand(toBottom = listOf(1, 4, 5)),
+                    state = States.aliceTookSecondMulligan,
+                    reason = "toBottom should have size 2 but has size 3"
+                )
+            )
         }
     }
 }

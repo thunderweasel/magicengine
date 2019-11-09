@@ -13,6 +13,7 @@ import engine.model.GameStart.ResolvingMulligans
 import engine.model.GameStart.StartingPlayerMustBeChosen
 import engine.model.GameState
 import engine.model.GameStatePendingRandomization
+import engine.model.InvalidPlayerAction
 import engine.model.MulliganDecision
 import engine.model.PlayerId
 import engine.model.PlayerState
@@ -59,10 +60,16 @@ private fun mulliganStateReduce(
 ): GameStatePendingRandomization {
     val gameState = state.gameState
     return when {
-        action is PlayerAction.KeepHand ->
+        action is PlayerAction.KeepHand -> {
+            if (action.toBottom.size != mulliganState.numberOfMulligans) throw InvalidPlayerAction(
+                action = action,
+                state = gameState,
+                reason = "toBottom should have size ${mulliganState.numberOfMulligans} but has size ${action.toBottom.size}"
+            )
             gameState.makeDecision(mulliganState, MulliganDecision.KEEP)
                 .putCardsOnBottom(playerId = mulliganState.currentChoice, toBottom = action.toBottom)
                 .checkIfAllPlayersDecidedMulligans(mulliganState)
+        }
         action is PlayerAction.Mulligan -> {
             gameState.makeDecision(mulliganState, MulliganDecision.MULLIGAN)
                 .putHandBack(playerId = mulliganState.currentChoice)

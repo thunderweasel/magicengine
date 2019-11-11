@@ -5,7 +5,8 @@ sealed class GameStart {
     data class ResolvingMulligans(
         val numberOfMulligans: Int,
         val startingPlayer: PlayerId,
-        val currentChoice: PlayerId
+        val turnToDecide: PlayerId,
+        val mulliganDecisions: Map<PlayerId, MulliganDecision>
     ): GameStart()
     data class GameStarted(val startingPlayer: PlayerId): GameStart()
 }

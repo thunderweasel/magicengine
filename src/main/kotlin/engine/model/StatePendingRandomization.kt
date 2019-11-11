@@ -9,11 +9,11 @@ data class StatePendingRandomization<T>(
 
 typealias GameStatePendingRandomization = StatePendingRandomization<GameState>
 
-fun GameState.noPendingRandomization() =
+fun <T> T.noPendingRandomization() =
     StatePendingRandomization(this, pendingAction = null)
 
-fun GameState.pendingRandomization(pendingAction: PendingRandomization) =
+fun <T> T.pendingRandomization(pendingAction: PendingRandomization?) =
     StatePendingRandomization(this, pendingAction = pendingAction)
 
-fun GameState.pendingRandomization(pendingActionCreator: GameState.() -> PendingRandomization?) =
+fun <T> T.pendingRandomization(pendingActionCreator: T.() -> PendingRandomization?) =
     StatePendingRandomization(this, pendingAction = pendingActionCreator())

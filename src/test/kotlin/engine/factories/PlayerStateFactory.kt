@@ -12,37 +12,31 @@ object PlayerStateFactory {
         id: Int = 0,
         hand: List<Card> = listOf(),
         library: List<Card> = DeckFactory.alice.minus(hand),
-        lifeTotal: Long = 20,
-        mulliganDecision: MulliganDecision = MulliganDecision.UNDECIDED
+        lifeTotal: Long = 20
     ) = PlayerState(
         id = id,
         hand = hand,
         library = library,
-        lifeTotal = lifeTotal,
-        mulliganDecision = mulliganDecision
+        lifeTotal = lifeTotal
     )
 
     fun createAlice(
         hand: List<Card> = listOf(),
-        lifeTotal: Long = 20,
-        mulliganDecision: MulliganDecision = MulliganDecision.UNDECIDED
+        lifeTotal: Long = 20
     ) = PlayerState(
         id = ID_ALICE,
         hand = hand,
         library = DeckFactory.alice.minus(hand),
-        lifeTotal = lifeTotal,
-        mulliganDecision = mulliganDecision
+        lifeTotal = lifeTotal
     )
 
     fun createBob(
         hand: List<Card> = listOf(),
-        lifeTotal: Long = 20,
-        mulliganDecision: MulliganDecision = MulliganDecision.UNDECIDED
+        lifeTotal: Long = 20
     ) = PlayerState(
         id = ID_BOB,
         hand = hand,
         library = DeckFactory.bob.minus(hand),
-        lifeTotal = lifeTotal,
-        mulliganDecision = mulliganDecision
+        lifeTotal = lifeTotal
     )
 }

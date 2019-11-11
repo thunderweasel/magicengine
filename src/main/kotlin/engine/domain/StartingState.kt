@@ -3,7 +3,6 @@ package engine.domain
 import engine.model.Card
 import engine.model.GameStart.StartingPlayerMustBeChosen
 import engine.model.GameState
-import engine.model.MulliganDecision
 import engine.model.PlayerId
 import engine.model.PlayerState
 
@@ -15,8 +14,7 @@ fun startingState(
         PlayerState(
             id = index + 1,
             library = deck,
-            lifeTotal = 20,
-            mulliganDecision = MulliganDecision.UNDECIDED
+            lifeTotal = 20
         )
     },
     gameStart = StartingPlayerMustBeChosen(playerDecidesWhoGoesFirst)

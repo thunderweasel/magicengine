@@ -5,30 +5,19 @@ import engine.domain.startingState
 import engine.model.Card
 import engine.model.GameState
 import engine.model.noPendingRandomization
-import engine.random.ActualRandomizer
-import engine.random.RandomShuffler
 import engine.random.RandomizationResolver
-import engine.random.Randomizer
-import engine.random.Shuffler
 import engine.reducer.GameStatePendingRandomizationReducer
 import engine.reducer.masterReducer
 
 class MagicEngine(
-    val shuffler: Shuffler<Card> = RandomShuffler(),
-    val randomizer: Randomizer = ActualRandomizer(),
-    val reducer: GameStatePendingRandomizationReducer = masterReducer()
-) {
-    private val randomizationResolver = RandomizationResolver<GameState>(
-        shuffler = shuffler,
-        randomizer = randomizer,
-        reducer = reducer
+    private val reducer: GameStatePendingRandomizationReducer = masterReducer(),
+    private val randomizationResolver: RandomizationResolver<GameState> = RandomizationResolver(
+        reducer = masterReducer()
     )
-
-    fun start2PlayerGame(deck1: List<Card>, deck2: List<Card>): GameState =
-        startingState(
-            shuffledPlayerDecks = listOf(deck1, deck2).map { shuffler.shuffle(it) },
-            playerDecidesWhoGoesFirst = randomizer.randomInt(1, 2)
-        )
+) {
+    fun start2PlayerGame(deck1: List<Card>, deck2: List<Card>): GameState {
+        return randomizationResolver.resolve(startingState(playerDecks = listOf(deck1, deck2)))
+    }
 
     fun performAction(action: PlayerAction, state: GameState): GameState {
         val gameStateAfterPlayerAction = reducer(action, state.noPendingRandomization())

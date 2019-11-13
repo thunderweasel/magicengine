@@ -5,6 +5,7 @@ import engine.action.PendingRandomization
 import engine.action.PlayerAction
 import engine.action.RandomizedResultAction
 import engine.action.RandomizedResultAction.InnerAction.PerformMulligans
+import engine.action.RandomizedResultAction.InnerAction.RandomizeChoiceForFirst
 import engine.domain.drawCards
 import engine.domain.firstInTurnOrder
 import engine.domain.nextInTurnOrder
@@ -35,8 +36,19 @@ private fun firstPlayerMustBeChosenStateReduce(
     action: GameAction,
     state: GameState
 ): GameStatePendingRandomization =
-    when (action) {
-        is PlayerAction.ChooseFirstPlayer -> drawOpeningHands(state, action)
+    when {
+        action is RandomizedResultAction && action.innerAction == RandomizeChoiceForFirst ->
+            state.copy(
+                players = state.players
+                    .zip(action.resolvedRandomization.completedShuffles)
+                    .map { (playerState, shuffledDeck) ->
+                        playerState.copy(
+                            library = shuffledDeck
+                        )
+                    },
+                gameStart = StartingPlayerMustBeChosen(action.resolvedRandomization.generatedNumbers.first())
+            )
+        action is PlayerAction.ChooseFirstPlayer -> drawOpeningHands(state, action)
         else -> state
     }.noPendingRandomization()
 

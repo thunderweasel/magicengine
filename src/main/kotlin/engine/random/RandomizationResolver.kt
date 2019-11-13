@@ -8,8 +8,8 @@ import engine.model.StatePendingRandomization
 
 class RandomizationResolver<T>(
     val reducer: (GameAction, StatePendingRandomization<T>) -> StatePendingRandomization<T>,
-    val shuffler: Shuffler<Card>,
-    val randomizer: Randomizer
+    val shuffler: Shuffler<Card> = RandomShuffler(),
+    val randomizer: Randomizer = ActualRandomizer()
 ) {
     fun resolve(state: StatePendingRandomization<T>): T {
         var resolvingState: StatePendingRandomization<T> = state

@@ -14,7 +14,9 @@ import engine.model.MulliganDecision
 import engine.model.PlayerState
 import engine.random.CheatShuffler
 import engine.random.FakeRandomizer
+import engine.random.RandomizationResolver
 import engine.random.ShuffleCheat
+import engine.reducer.masterReducer
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
@@ -24,11 +26,14 @@ import org.junit.jupiter.api.Test
 @DisplayName("Starting the Game")
 class StartingTheGameTest {
     private val engine = MagicEngine(
-        shuffler = cheatShuffler,
-        // Feeding fake values for random choices
-        randomizer = FakeRandomizer(
-            listOf(
-                PlayerStateFactory.ID_ALICE // rig the coin toss for Alice
+        randomizationResolver = RandomizationResolver(
+            reducer = masterReducer(),
+            shuffler = cheatShuffler,
+            // Feeding fake values for random choices
+            randomizer = FakeRandomizer(
+                listOf(
+                    PlayerStateFactory.ID_ALICE // rig the coin toss for Alice
+                )
             )
         )
     )
@@ -52,7 +57,8 @@ class StartingTheGameTest {
             PlayerAction.ChooseFirstPlayer(
                 chosenPlayer = PlayerStateFactory.ID_BOB
             ),
-            States.aliceWinsCoinToss)
+            States.aliceWinsCoinToss
+        )
 
         assertThat(gameState).isEqualTo(States.drawnFirstHands)
     }

@@ -24,7 +24,7 @@ import engine.model.pendingRandomization
 private const val STARTING_HAND_SIZE = 7
 
 val gameStartStateReducer: GameStatePendingRandomizationReducer = { action, state ->
-    when (val gameStart = state.gameState.gameStart) {
+    when (state.gameState.gameStart) {
         is StartingPlayerMustBeChosen -> firstPlayerMustBeChosenStateReduce(action, state.gameState)
         is ResolvingMulligans -> mulliganStateReduce(action, state)
         else -> state

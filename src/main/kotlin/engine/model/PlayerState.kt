@@ -7,10 +7,10 @@ package engine.model
  * type of card. This is used by [PlayerStateView] to create a version of player state where all cards are represented
  * by a [CardView], which can be known or unknown depending on the game state.
  */
-data class PlayerStateGeneric<CARD_TYPE : Any>(
+data class PlayerStateGeneric<CARD : Any>(
     val id: PlayerId,
-    val hand: List<CARD_TYPE> = listOf(),
-    val library: List<CARD_TYPE> = listOf(),
+    val hand: List<CARD> = listOf(),
+    val library: List<CARD> = listOf(),
     val lifeTotal: Long
 )
 typealias PlayerState = PlayerStateGeneric<Card>

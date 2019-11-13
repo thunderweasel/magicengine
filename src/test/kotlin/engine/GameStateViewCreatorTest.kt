@@ -2,13 +2,13 @@ package engine
 
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
-import engine.model.CardView
+import engine.model.view.CardView
 import engine.model.GameStart
 import engine.model.GameState
-import engine.model.GameStateView
+import engine.model.view.GameStateView
 import engine.model.MulliganDecision
 import engine.model.PlayerState
-import engine.model.PlayerStateView
+import engine.model.view.PlayerStateView
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

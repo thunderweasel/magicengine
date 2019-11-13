@@ -10,7 +10,7 @@ import engine.model.GameStatePendingRandomization
 typealias GameStatePendingRandomizationReducer = (GameAction, GameStatePendingRandomization) -> GameStatePendingRandomization
 fun masterReducer(children: List<GameStatePendingRandomizationReducer> = childReducers): GameStatePendingRandomizationReducer =
     { action, state ->
-        childReducers.fold(state) { foldedState, reducer ->
+        children.fold(state) { foldedState, reducer ->
             reducer(action, foldedState)
         }
     }

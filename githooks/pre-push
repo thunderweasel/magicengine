@@ -7,7 +7,7 @@ if [ $? -ne 0 ]; then exit 1; fi
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$BRANCH" == "master" ]]; then
-  if [[ -z $(git status --porcelain) ]]; then
+  if output=$(git status --porcelain) && [ -n "$output" ]; then
     echo "Can't run pre-push checks -- working directory is not clean"  
     exit 1
   fi

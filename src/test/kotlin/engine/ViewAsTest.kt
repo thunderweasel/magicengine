@@ -42,6 +42,7 @@ class ViewAsTest {
     fun `when viewing as Alice, hides information that should be hidden to Alice`() {
         assertThat(exampleState.viewAs(PlayerStateFactory.ID_ALICE)).isEqualTo(
             GameState(
+                viewer = PlayerStateFactory.ID_ALICE,
                 players = listOf(
                     PlayerState(
                         id = PlayerStateFactory.ID_ALICE,
@@ -78,6 +79,7 @@ class ViewAsTest {
     fun `when viewing as Bob, hides information that should be hidden to Bob`() {
         assertThat(exampleState.viewAs(PlayerStateFactory.ID_BOB)).isEqualTo(
             GameState(
+                viewer = PlayerStateFactory.ID_BOB,
                 players = listOf(
                     PlayerState(
                         id = PlayerStateFactory.ID_ALICE,

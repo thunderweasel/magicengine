@@ -12,6 +12,6 @@ sealed class Card {
         override fun toString() = name
     }
     object UnknownCard: Card() {
-        override fun toString() = "UNKNOWN"
+        override fun toString() = "?"
     }
 }

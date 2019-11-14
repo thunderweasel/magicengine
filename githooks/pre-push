@@ -1,9 +1,14 @@
 #!/bin/sh
+
+# Copied from ktlint's pre-push hook
 # https://github.com/shyiko/ktlint pre-push hook
 git diff --name-only HEAD origin/$(git rev-parse --abbrev-ref HEAD) | grep '\.kt[s"]\?$' | xargs ktlint --relative .
 if [ $? -ne 0 ]; then exit 1; fi
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$BRANCH" == "master" ]]; then
+  if [[ -z $(git status --porcelain) ]]; then
+    echo "Can't run pre-push checks -- working directory is not clean"  
+  fi
   ./gradlew test
 fi

@@ -9,4 +9,4 @@ jobs:
       TERM: dumb
     steps:
       - checkout
-      - run: ./gradlew test
+      - run: gradle test

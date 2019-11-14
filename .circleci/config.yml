@@ -9,7 +9,7 @@ jobs:
       TERM: dumb
     steps:
       - checkout
-      - run: gradle test
+      - run: gradle lintKotlin test
 workflows: 
   version: 2
   continuous:

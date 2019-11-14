@@ -1,7 +1,6 @@
 package engine.domain
 
 import engine.action.PendingRandomization
-import engine.action.RandomizedResultAction
 import engine.action.RandomizedResultAction.InnerAction.RandomizeChoiceForFirst
 import engine.model.Card
 import engine.model.GameStart

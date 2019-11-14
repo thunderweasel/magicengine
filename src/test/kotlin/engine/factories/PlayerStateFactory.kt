@@ -1,7 +1,6 @@
 package engine.factories
 
 import engine.model.Card
-import engine.model.MulliganDecision
 import engine.model.PlayerState
 
 object PlayerStateFactory {

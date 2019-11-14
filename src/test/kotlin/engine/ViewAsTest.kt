@@ -2,17 +2,15 @@ package engine
 
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
-import engine.model.view.CardView
+import engine.model.Card
 import engine.model.GameStart
 import engine.model.GameState
-import engine.model.view.GameStateView
 import engine.model.MulliganDecision
 import engine.model.PlayerState
-import engine.model.view.PlayerStateView
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class GameStateViewCreatorTest {
+class ViewAsTest {
     private val exampleState =
         GameState(
             players = listOf(
@@ -43,23 +41,23 @@ class GameStateViewCreatorTest {
     @Test
     fun `when viewing as Alice, hides information that should be hidden to Alice`() {
         assertThat(exampleState.viewAs(PlayerStateFactory.ID_ALICE)).isEqualTo(
-            GameStateView(
+            GameState(
                 players = listOf(
-                    PlayerStateView(
+                    PlayerState(
                         id = PlayerStateFactory.ID_ALICE,
                         // Alice cannot see the contents of her library
-                        library = (7..59).map { CardView.UnknownCard },
+                        library = (7..59).map { Card.UnknownCard },
                         lifeTotal = 18,
                         // But she can see her own hand
-                        hand = DeckFactory.alice.slice(0..6).map { CardView.KnownCard(it) }
+                        hand = DeckFactory.alice.slice(0..6)
                     ),
-                    PlayerStateView(
+                    PlayerState(
                         id = PlayerStateFactory.ID_BOB,
                         // Alice cannot see the contents of Bob's library
-                        library = (7..59).map { CardView.UnknownCard },
+                        library = (7..59).map { Card.UnknownCard },
                         lifeTotal = 12,
                         // Nor can she see Bob's hand
-                        hand = (0..6).map { CardView.UnknownCard }
+                        hand = (0..6).map { Card.UnknownCard }
                     )
                 ),
                 // Mulligan state is all open information
@@ -79,23 +77,23 @@ class GameStateViewCreatorTest {
     @Test
     fun `when viewing as Bob, hides information that should be hidden to Bob`() {
         assertThat(exampleState.viewAs(PlayerStateFactory.ID_BOB)).isEqualTo(
-            GameStateView(
+            GameState(
                 players = listOf(
-                    PlayerStateView(
+                    PlayerState(
                         id = PlayerStateFactory.ID_ALICE,
                         // Bob cannot see the contents of Alice's library
-                        library = (7..59).map { CardView.UnknownCard },
+                        library = (7..59).map { Card.UnknownCard },
                         lifeTotal = 18,
                         // Nor can he see Alice's hand
-                        hand = (0..6).map { CardView.UnknownCard }
+                        hand = (0..6).map { Card.UnknownCard }
                     ),
-                    PlayerStateView(
+                    PlayerState(
                         id = PlayerStateFactory.ID_BOB,
                         // Bob cannot see the contents of his library
-                        library = (7..59).map { CardView.UnknownCard },
+                        library = (7..59).map { Card.UnknownCard },
                         lifeTotal = 12,
                         // But he can see his own hand
-                        hand = DeckFactory.bob.slice(0..6).map { CardView.KnownCard(it) }
+                        hand = DeckFactory.bob.slice(0..6)
                     )
                 ),
                 // Mulligan state is all open information

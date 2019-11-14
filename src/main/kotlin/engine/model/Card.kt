@@ -5,10 +5,13 @@ package engine.model
  *
  * Defines an interface mainly so that [CardView.KnownCard] can implement it and have all the same properties.
  */
-interface Card {
-    val name: String
+sealed class Card {
+    data class KnownCard(
+        val name: String
+    ): Card() {
+        override fun toString() = name
+    }
+    object UnknownCard: Card() {
+        override fun toString() = "UNKNOWN"
+    }
 }
-private data class CardImpl(override val name: String) : Card {
-    override fun toString() = name
-}
-fun card(name: String): Card = CardImpl(name)

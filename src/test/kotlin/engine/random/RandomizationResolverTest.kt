@@ -5,9 +5,9 @@ import engine.action.PendingRandomization
 import engine.action.RandomizedResultAction
 import engine.action.ResolvedRandomization
 import engine.model.Card
+import engine.model.Card.KnownCard
 import engine.model.RandomRequest
 import engine.model.StatePendingRandomization
-import engine.model.card
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -41,8 +41,8 @@ class RandomizationResolverTest {
             gameState = "state",
             pendingAction = pendingAction(
                 shuffles = listOf(
-                    listOf(card("1"), card("2"), card("3")),
-                    listOf(card("A"), card("B"), card("C"))
+                    listOf(KnownCard("1"), KnownCard("2"), KnownCard("3")),
+                    listOf(KnownCard("A"), KnownCard("B"), KnownCard("C"))
                 ),
                 randomNumbers = listOf(1..2, 2..3)
             )
@@ -56,8 +56,8 @@ class RandomizationResolverTest {
                 randomizedResultAction(
                     // Deterministic due to shuffle cheating
                     completedShuffles = listOf(
-                        listOf(card("2"), card("3"), card("1")),
-                        listOf(card("B"), card("C"), card("A"))
+                        listOf(KnownCard("2"), KnownCard("3"), KnownCard("1")),
+                        listOf(KnownCard("B"), KnownCard("C"), KnownCard("A"))
                     ),
                     generatedNumbers = listOf(1, 2)
                 ) to initialState

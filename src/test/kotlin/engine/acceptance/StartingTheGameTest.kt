@@ -6,8 +6,8 @@ import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
 import engine.model.Card
 import engine.model.GameStart
-import engine.model.GameStart.StartingPlayerMustBeChosen
 import engine.model.GameStart.ResolvingMulligans
+import engine.model.GameStart.StartingPlayerMustBeChosen
 import engine.model.GameState
 import engine.model.InvalidPlayerAction
 import engine.model.MulliganDecision

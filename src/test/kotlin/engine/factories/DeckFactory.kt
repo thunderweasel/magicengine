@@ -1,7 +1,6 @@
 package engine.factories
 
-import engine.model.Card
-import engine.model.card
+import engine.model.Card.KnownCard
 
 object DeckFactory {
     val alice by lazy {
@@ -13,6 +12,6 @@ object DeckFactory {
 
     fun nonsenseDeck(prefix: String) =
         (0..59).toList().map {
-            card("$prefix$it")
+            KnownCard("$prefix$it")
         }
 }

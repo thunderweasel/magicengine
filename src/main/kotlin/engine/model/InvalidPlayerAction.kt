@@ -6,4 +6,4 @@ data class InvalidPlayerAction(
     val action: PlayerAction,
     val state: GameState,
     val reason: String
-): Throwable()
+) : Throwable()

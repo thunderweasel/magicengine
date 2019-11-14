@@ -9,4 +9,3 @@ data class RandomizedResultAction(
         object PerformMulligans : InnerAction()
     }
 }
-

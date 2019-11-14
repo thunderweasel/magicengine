@@ -8,10 +8,10 @@ package engine.model
 sealed class Card {
     data class KnownCard(
         val name: String
-    ): Card() {
+    ) : Card() {
         override fun toString() = name
     }
-    object UnknownCard: Card() {
+    object UnknownCard : Card() {
         override fun toString() = "?"
     }
 }

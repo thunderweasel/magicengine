@@ -1,8 +1,8 @@
 package engine.random
 
+import kotlin.random.Random
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import kotlin.random.Random
 
 class RandomShufflerTest {
     private val cards = listOf(

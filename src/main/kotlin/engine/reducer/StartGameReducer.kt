@@ -216,8 +216,7 @@ private fun GameState.requestRandomizationForPlayersToShuffleDecks(mulliganState
 private fun ResolvingMulligans.whoKept() = checkMulliganDecision(MulliganDecision.KEEP)
 private fun ResolvingMulligans.whoMulled() = checkMulliganDecision(MulliganDecision.MULLIGAN)
 private fun ResolvingMulligans.whoAreUndecided() = checkMulliganDecision(MulliganDecision.UNDECIDED)
-private fun ResolvingMulligans.checkMulliganDecision(decision: MulliganDecision) =
-    { it: PlayerState -> mulliganDecisions[it.id] == decision }
+private fun ResolvingMulligans.checkMulliganDecision(decision: MulliganDecision) = { it: PlayerState -> mulliganDecisions[it.id] == decision }
 
 private inline fun GameState.replacePlayerState(
     id: PlayerId,
@@ -235,4 +234,3 @@ private fun List<PlayerState>.replacePlayerStates(
 ) = map { existingPlayer ->
     playersToReplace.firstOrNull { it.id == existingPlayer.id } ?: existingPlayer
 }
-

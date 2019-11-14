@@ -10,3 +10,8 @@ jobs:
     steps:
       - checkout
       - run: gradle test
+workflows: 
+  version: 2
+  continuous:
+    jobs:
+      - test

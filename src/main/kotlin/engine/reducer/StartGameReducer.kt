@@ -2,16 +2,14 @@ package engine.reducer
 
 import engine.action.GameAction
 import engine.action.PendingRandomization
+import engine.action.PerformMulligans
 import engine.action.PlayerAction
+import engine.action.RandomizeChoiceForFirst
 import engine.action.RandomizedResultAction
-import engine.action.RandomizedResultAction.InnerAction.PerformMulligans
-import engine.action.RandomizedResultAction.InnerAction.RandomizeChoiceForFirst
 import engine.domain.drawCards
 import engine.domain.firstInTurnOrder
 import engine.domain.nextInTurnOrder
-import engine.model.GameStart
-import engine.model.GameStart.ResolvingMulligans
-import engine.model.GameStart.StartingPlayerMustBeChosen
+import engine.model.GameStarted
 import engine.model.GameState
 import engine.model.GameStatePendingRandomization
 import engine.model.InvalidPlayerAction
@@ -19,6 +17,8 @@ import engine.model.MulliganDecision
 import engine.model.PlayerId
 import engine.model.PlayerState
 import engine.model.RandomRequest
+import engine.model.ResolvingMulligans
+import engine.model.StartingPlayerMustBeChosen
 import engine.model.noPendingRandomization
 import engine.model.pendingRandomization
 
@@ -199,7 +199,7 @@ private fun GameState.checkIfAllPlayersDecidedMulligans(): GameStatePendingRando
 private fun GameState.startTheGame(): GameState {
     require(gameStart is ResolvingMulligans)
     return copy(
-        gameStart = GameStart.GameStarted(startingPlayer = gameStart.startingPlayer)
+        gameStart = GameStarted(startingPlayer = gameStart.startingPlayer)
     )
 }
 

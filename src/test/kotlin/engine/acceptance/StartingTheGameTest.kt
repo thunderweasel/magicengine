@@ -5,13 +5,13 @@ import engine.action.PlayerAction
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
 import engine.model.Card
-import engine.model.GameStart
-import engine.model.GameStart.ResolvingMulligans
-import engine.model.GameStart.StartingPlayerMustBeChosen
+import engine.model.GameStarted
 import engine.model.GameState
 import engine.model.InvalidPlayerAction
 import engine.model.MulliganDecision
 import engine.model.PlayerState
+import engine.model.ResolvingMulligans
+import engine.model.StartingPlayerMustBeChosen
 import engine.random.CheatShuffler
 import engine.random.FakeRandomizer
 import engine.random.RandomizationResolver
@@ -319,7 +319,7 @@ private object States {
                 // Bob is unchanged
                 aliceTookSecondMulligan.players[1]
             ),
-            gameStart = GameStart.GameStarted(startingPlayer = PlayerStateFactory.ID_BOB)
+            gameStart = GameStarted(startingPlayer = PlayerStateFactory.ID_BOB)
         )
     }
 }

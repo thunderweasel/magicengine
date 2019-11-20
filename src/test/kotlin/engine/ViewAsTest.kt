@@ -3,10 +3,10 @@ package engine
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
 import engine.model.Card
-import engine.model.GameStart
 import engine.model.GameState
 import engine.model.MulliganDecision
 import engine.model.PlayerState
+import engine.model.ResolvingMulligans
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -27,7 +27,7 @@ class ViewAsTest {
                     hand = DeckFactory.bob.slice(0..6)
                 )
             ),
-            gameStart = GameStart.ResolvingMulligans(
+            gameStart = ResolvingMulligans(
                 numberOfMulligans = 4,
                 startingPlayer = PlayerStateFactory.ID_BOB,
                 turnToDecide = PlayerStateFactory.ID_BOB,
@@ -62,7 +62,7 @@ class ViewAsTest {
                     )
                 ),
                 // Mulligan state is all open information
-                gameStart = GameStart.ResolvingMulligans(
+                gameStart = ResolvingMulligans(
                     numberOfMulligans = 4,
                     startingPlayer = PlayerStateFactory.ID_BOB,
                     turnToDecide = PlayerStateFactory.ID_BOB,
@@ -99,7 +99,7 @@ class ViewAsTest {
                     )
                 ),
                 // Mulligan state is all open information
-                gameStart = GameStart.ResolvingMulligans(
+                gameStart = ResolvingMulligans(
                     numberOfMulligans = 4,
                     startingPlayer = PlayerStateFactory.ID_BOB,
                     turnToDecide = PlayerStateFactory.ID_BOB,

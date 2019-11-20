@@ -1,12 +1,12 @@
 package engine.domain
 
 import engine.action.PendingRandomization
-import engine.action.RandomizedResultAction.InnerAction.RandomizeChoiceForFirst
+import engine.action.RandomizeChoiceForFirst
 import engine.model.Card
-import engine.model.GameStart
 import engine.model.GameState
 import engine.model.PlayerState
 import engine.model.RandomRequest
+import engine.model.StartingPlayerMustBeChosen
 import engine.model.pendingRandomization
 
 fun startingState(
@@ -19,7 +19,7 @@ fun startingState(
             lifeTotal = 20
         )
     },
-    gameStart = GameStart.StartingPlayerMustBeChosen(player = null)
+    gameStart = StartingPlayerMustBeChosen(player = null)
 ).pendingRandomization(PendingRandomization(
     actionOnResolution = RandomizeChoiceForFirst,
     request = RandomRequest(

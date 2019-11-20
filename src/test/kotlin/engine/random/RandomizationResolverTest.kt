@@ -2,6 +2,7 @@ package engine.random
 
 import engine.action.GameAction
 import engine.action.PendingRandomization
+import engine.action.PerformMulligans
 import engine.action.RandomizedResultAction
 import engine.action.ResolvedRandomization
 import engine.model.Card
@@ -99,7 +100,7 @@ class RandomizationResolverTest {
 
     private fun pendingAction(shuffles: List<List<Card>> = emptyList(), randomNumbers: List<IntRange> = emptyList()) =
         PendingRandomization(
-            actionOnResolution = RandomizedResultAction.InnerAction.PerformMulligans,
+            actionOnResolution = PerformMulligans,
             request = RandomRequest(
                 shuffles = shuffles,
                 randomNumbers = randomNumbers
@@ -111,7 +112,7 @@ class RandomizationResolverTest {
         generatedNumbers: List<Int> = emptyList()
     ) =
         RandomizedResultAction(
-            innerAction = RandomizedResultAction.InnerAction.PerformMulligans,
+            innerAction = PerformMulligans,
             resolvedRandomization = ResolvedRandomization(
                 completedShuffles = completedShuffles,
                 generatedNumbers = generatedNumbers

@@ -6,6 +6,7 @@ import engine.model.Card
 import engine.model.GameState
 import engine.model.PlayerState
 import engine.model.RandomRequest
+import engine.model.Range
 import engine.model.StartingPlayerMustBeChosen
 import engine.model.pendingRandomization
 
@@ -24,6 +25,6 @@ fun startingState(
     actionOnResolution = ElectDeciderOfStartingPlayer,
     request = RandomRequest(
         shuffles = playerDecks,
-        randomNumbers = listOf(1 until playerDecks.size)
+        randomNumbers = listOf(Range(1 until playerDecks.size))
     )
 ))

@@ -8,6 +8,7 @@ import engine.action.ResolvedRandomization
 import engine.model.Card
 import engine.model.Card.KnownCard
 import engine.model.RandomRequest
+import engine.model.Range
 import engine.model.StatePendingRandomization
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -103,7 +104,7 @@ class RandomizationResolverTest {
             actionOnResolution = PerformMulligans,
             request = RandomRequest(
                 shuffles = shuffles,
-                randomNumbers = randomNumbers
+                randomNumbers = randomNumbers.map { Range(it) }
             )
         )
 

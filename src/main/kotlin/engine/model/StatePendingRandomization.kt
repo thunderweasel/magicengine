@@ -1,7 +1,9 @@
 package engine.model
 
 import engine.action.PendingRandomization
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class StatePendingRandomization<T>(
     val gameState: T,
     val pendingAction: PendingRandomization? = null

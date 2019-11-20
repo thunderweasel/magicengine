@@ -1,8 +1,11 @@
 package engine.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * Representation of the entire game state.
  */
+@Serializable
 data class GameState(
     val viewer: PlayerId? = null,
     val players: List<PlayerState>,

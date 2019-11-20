@@ -2,7 +2,7 @@ version: 2.1
 orbs:
   codecov: codecov/codecov@1.0.5
 jobs:
-  test:
+  build:
     docker:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/repo
@@ -14,8 +14,3 @@ jobs:
       - run: gradle lintKotlin test jacocoTestReport
       - codecov/upload:
           file: build/reports/jacoco/test/jacocoTestReport.xml
-workflows: 
-  version: 2
-  continuous:
-    jobs:
-      - test

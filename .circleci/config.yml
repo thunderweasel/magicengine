@@ -1,4 +1,6 @@
 version: 2
+orbs:
+  codecov: codecov/codecov@1.0.5
 jobs:
   test:
     docker:
@@ -9,7 +11,9 @@ jobs:
       TERM: dumb
     steps:
       - checkout
-      - run: gradle lintKotlin test
+      - run: gradle lintKotlin test jacocoTestReport
+      - codecov/upload:
+        file: build/reports/jacoco/test/jacocoTestReport.xml
 workflows: 
   version: 2
   continuous:

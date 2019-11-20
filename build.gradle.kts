@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "1.3.60"
     id("org.jmailen.kotlinter") version "2.1.2"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.3.60"
+    jacoco
 }
 
 version = "0.1"
@@ -26,4 +27,13 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks {
+    jacocoTestReport {
+        reports {
+            xml.isEnabled = true
+            html.isEnabled = true
+        }
+    }
 }

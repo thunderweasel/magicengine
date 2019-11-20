@@ -1,7 +1,7 @@
 package engine.domain
 
+import engine.action.ElectDeciderOfStartingPlayer
 import engine.action.PendingRandomization
-import engine.action.RandomizeChoiceForFirst
 import engine.model.Card
 import engine.model.GameState
 import engine.model.PlayerState
@@ -21,7 +21,7 @@ fun startingState(
     },
     gameStart = StartingPlayerMustBeChosen(player = null)
 ).pendingRandomization(PendingRandomization(
-    actionOnResolution = RandomizeChoiceForFirst,
+    actionOnResolution = ElectDeciderOfStartingPlayer,
     request = RandomRequest(
         shuffles = playerDecks,
         randomNumbers = listOf(1 until playerDecks.size)

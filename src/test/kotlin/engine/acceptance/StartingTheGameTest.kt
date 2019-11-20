@@ -1,7 +1,9 @@
 package engine.acceptance
 
 import engine.MagicEngine
-import engine.action.PlayerAction
+import engine.action.ChooseFirstPlayer
+import engine.action.ChooseToKeepHand
+import engine.action.ChooseToMulligan
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
 import engine.model.Card
@@ -54,7 +56,7 @@ class StartingTheGameTest {
     fun `once turn order is resolved, each player draws their starting hand`() {
         // Alice chooses to be on the draw
         val gameState = engine.performAction(
-            PlayerAction.ChooseFirstPlayer(
+            ChooseFirstPlayer(
                 chosenPlayer = PlayerStateFactory.ID_BOB
             ),
             States.aliceWinsCoinToss
@@ -68,7 +70,7 @@ class StartingTheGameTest {
     fun `the starting player decides whether to keep or mulligan first`() {
         // Bob decides to mulligan
         val gameState = engine.performAction(
-            PlayerAction.Mulligan,
+            ChooseToMulligan,
             States.drawnFirstHands
         )
 
@@ -80,7 +82,7 @@ class StartingTheGameTest {
     fun `then the next player chooses whether to mulligan, after which both players will mulligan simultaneously`() {
         // Alice decides to mulligan
         val gameState = engine.performAction(
-            PlayerAction.Mulligan,
+            ChooseToMulligan,
             States.bobDecidedToTakeFirstMulligan
         )
 
@@ -94,7 +96,7 @@ class StartingTheGameTest {
         @Test
         fun `Bob decides to keep after first mulligan`() {
             val gameState = engine.performAction(
-                PlayerAction.KeepHand(toBottom = listOf(3)), // 4th card to the bottom
+                ChooseToKeepHand(toBottom = listOf(3)), // 4th card to the bottom
                 States.bothPlayersTookFirstMulligan
             )
             assertThat(gameState).isEqualTo(States.bobDecidedToKeepAfterFirstMulligan)
@@ -103,7 +105,7 @@ class StartingTheGameTest {
         @Test
         fun `Alice mulligans again`() {
             val gameState2 = engine.performAction(
-                PlayerAction.Mulligan,
+                ChooseToMulligan,
                 States.bobDecidedToKeepAfterFirstMulligan
             )
             assertThat(gameState2).isEqualTo(States.aliceTookSecondMulligan)
@@ -112,7 +114,7 @@ class StartingTheGameTest {
         @Test
         fun `Alice keeps after second mulligan`() {
             val gameState2 = engine.performAction(
-                PlayerAction.KeepHand(toBottom = listOf(4, 5)), // 5th and 6th card to the bottom
+                ChooseToKeepHand(toBottom = listOf(4, 5)), // 5th and 6th card to the bottom
                 States.aliceTookSecondMulligan
             )
             assertThat(gameState2).isEqualTo(States.mulligansResolved)
@@ -122,12 +124,12 @@ class StartingTheGameTest {
         fun `if Alice tries to put the wrong number of cards on the bottom it fails`() {
             assertThatThrownBy {
                 engine.performAction(
-                    PlayerAction.KeepHand(toBottom = listOf(1, 4, 5)),
+                    ChooseToKeepHand(toBottom = listOf(1, 4, 5)),
                     States.aliceTookSecondMulligan
                 )
             }.isEqualTo(
                 InvalidPlayerAction(
-                    action = PlayerAction.KeepHand(toBottom = listOf(1, 4, 5)),
+                    action = ChooseToKeepHand(toBottom = listOf(1, 4, 5)),
                     state = States.aliceTookSecondMulligan,
                     reason = "toBottom should have size 2 but has size 3"
                 )

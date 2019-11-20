@@ -1,10 +1,12 @@
 package engine.reducer
 
+import engine.action.ChooseFirstPlayer
+import engine.action.ChooseToKeepHand
+import engine.action.ChooseToMulligan
+import engine.action.ElectDeciderOfStartingPlayer
 import engine.action.GameAction
 import engine.action.PendingRandomization
 import engine.action.PerformMulligans
-import engine.action.PlayerAction
-import engine.action.RandomizeChoiceForFirst
 import engine.action.RandomizedResultAction
 import engine.domain.drawCards
 import engine.domain.firstInTurnOrder
@@ -37,7 +39,7 @@ private fun firstPlayerMustBeChosenStateReduce(
     state: GameState
 ): GameStatePendingRandomization =
     when {
-        action is RandomizedResultAction && action.innerAction == RandomizeChoiceForFirst ->
+        action is RandomizedResultAction && action.innerAction == ElectDeciderOfStartingPlayer ->
             state.copy(
                 players = state.players
                     .zip(action.resolvedRandomization.completedShuffles)
@@ -48,13 +50,13 @@ private fun firstPlayerMustBeChosenStateReduce(
                     },
                 gameStart = StartingPlayerMustBeChosen(action.resolvedRandomization.generatedNumbers.first())
             )
-        action is PlayerAction.ChooseFirstPlayer -> drawOpeningHands(state, action)
+        action is ChooseFirstPlayer -> drawOpeningHands(state, action)
         else -> state
     }.noPendingRandomization()
 
 private fun drawOpeningHands(
     state: GameState,
-    action: PlayerAction.ChooseFirstPlayer
+    action: ChooseFirstPlayer
 ): GameState =
     state.copy(
         players = state.players.map { it.drawCards(STARTING_HAND_SIZE) },
@@ -76,7 +78,7 @@ private fun mulliganStateReduce(
     val mulliganState = gameState.gameStart
     require(mulliganState is ResolvingMulligans)
     return when {
-        action is PlayerAction.KeepHand -> {
+        action is ChooseToKeepHand -> {
             if (action.toBottom.size != mulliganState.numberOfMulligans) throw InvalidPlayerAction(
                 action = action,
                 state = gameState,
@@ -86,7 +88,7 @@ private fun mulliganStateReduce(
                 .putCardsOnBottom(playerId = mulliganState.turnToDecide, toBottom = action.toBottom)
                 .checkIfAllPlayersDecidedMulligans()
         }
-        action is PlayerAction.Mulligan -> {
+        action is ChooseToMulligan -> {
             gameState.makeDecision(MulliganDecision.MULLIGAN)
                 .putHandBack(playerId = mulliganState.turnToDecide)
                 .checkIfAllPlayersDecidedMulligans()

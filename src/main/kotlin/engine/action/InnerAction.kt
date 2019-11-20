@@ -1,5 +1,5 @@
 package engine.action
 
 sealed class InnerAction
-object RandomizeChoiceForFirst : InnerAction()
+object ElectDeciderOfStartingPlayer : InnerAction()
 object PerformMulligans : InnerAction()

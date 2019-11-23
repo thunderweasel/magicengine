@@ -4,6 +4,7 @@ import engine.acceptance.GameStateTree.Edge.PlayerChoice
 import engine.acceptance.GameStateTree.Edge.Possibility
 import engine.action.PlayerAction
 import engine.action.ResolvedRandomization
+import engine.model.StatePendingRandomization
 
 object GameStateTree {
     sealed class OutcomeNode<STATE_TYPE> {
@@ -19,6 +20,7 @@ object GameStateTree {
 
         data class PendingRandomization<STATE_TYPE>(
             override val description: String? = null,
+            val statePendingRandomization: StatePendingRandomization<STATE_TYPE>? = null,
             val possibilities: List<Possibility<STATE_TYPE>>
         ) : OutcomeNode<STATE_TYPE>() {
             override val edges get() = possibilities

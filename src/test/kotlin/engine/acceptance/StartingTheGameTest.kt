@@ -1,9 +1,11 @@
 package engine.acceptance
 
-import engine.MagicEngine
+import engine.acceptance.TreeMaking.Companion.makeStateTree
 import engine.action.ChooseFirstPlayer
 import engine.action.ChooseToKeepHand
 import engine.action.ChooseToMulligan
+import engine.action.ResolvedRandomization
+import engine.domain.startingState
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
 import engine.model.Card
@@ -15,142 +17,95 @@ import engine.model.PlayerState
 import engine.model.ResolvingMulligans
 import engine.model.StartingPlayerMustBeChosen
 import engine.random.CheatShuffler
-import engine.random.FakeRandomizer
-import engine.random.RandomizationResolver
 import engine.random.ShuffleCheat
 import engine.reducer.masterReducer
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
-@DisplayName("Starting the Game")
-class StartingTheGameTest {
-    private val engine = MagicEngine(
-        randomizationResolver = RandomizationResolver(
-            reducer = masterReducer(),
-            shuffler = cheatShuffler,
-            // Feeding fake values for random choices
-            randomizer = FakeRandomizer(
-                listOf(
-                    PlayerStateFactory.ID_ALICE // rig the coin toss for Alice
-                )
-            )
-        )
-    )
-
-    // 103.1, 103.2, 103.3 (implicit)
-    @Test
-    fun `at the start of the game, decks are shuffled and a random player gets to choose turn order`() {
-        val gameState = engine.start2PlayerGame(
-            deck1 = DeckFactory.alice,
-            deck2 = DeckFactory.bob
-        )
-
-        assertThat(gameState).isEqualTo(States.aliceWinsCoinToss)
-    }
-
-    // 103.4
-    @Test
-    fun `once turn order is resolved, each player draws their starting hand`() {
-        // Alice chooses to be on the draw
-        val gameState = engine.performAction(
-            ChooseFirstPlayer(
-                chosenPlayer = PlayerStateFactory.ID_BOB
-            ),
-            States.aliceWinsCoinToss
-        )
-
-        assertThat(gameState).isEqualTo(States.drawnFirstHands)
-    }
-
-    // 103.4
-    @Test
-    fun `the starting player decides whether to keep or mulligan first`() {
-        // Bob decides to mulligan
-        val gameState = engine.performAction(
-            ChooseToMulligan,
-            States.drawnFirstHands
-        )
-
-        assertThat(gameState).isEqualTo(States.bobDecidedToTakeFirstMulligan)
-    }
-
-    // 103.4
-    @Test
-    fun `then the next player chooses whether to mulligan, after which both players will mulligan simultaneously`() {
-        // Alice decides to mulligan
-        val gameState = engine.performAction(
-            ChooseToMulligan,
-            States.bobDecidedToTakeFirstMulligan
-        )
-
-        assertThat(gameState).isEqualTo(States.bothPlayersTookFirstMulligan)
-    }
-
-    // 103.4
-    @Nested
-    @DisplayName("this process repeats until both players decide to keep")
-    inner class RepeatedMulligan {
-        @Test
-        fun `Bob decides to keep after first mulligan`() {
-            val gameState = engine.performAction(
-                ChooseToKeepHand(toBottom = listOf(3)), // 4th card to the bottom
-                States.bothPlayersTookFirstMulligan
-            )
-            assertThat(gameState).isEqualTo(States.bobDecidedToKeepAfterFirstMulligan)
-        }
-
-        @Test
-        fun `Alice mulligans again`() {
-            val gameState2 = engine.performAction(
-                ChooseToMulligan,
-                States.bobDecidedToKeepAfterFirstMulligan
-            )
-            assertThat(gameState2).isEqualTo(States.aliceTookSecondMulligan)
-        }
-
-        @Test
-        fun `Alice keeps after second mulligan`() {
-            val gameState2 = engine.performAction(
-                ChooseToKeepHand(toBottom = listOf(4, 5)), // 5th and 6th card to the bottom
-                States.aliceTookSecondMulligan
-            )
-            assertThat(gameState2).isEqualTo(States.mulligansResolved)
-        }
-
-        @Test
-        fun `if Alice tries to put the wrong number of cards on the bottom it fails`() {
-            assertThatThrownBy {
-                engine.performAction(
-                    ChooseToKeepHand(toBottom = listOf(1, 4, 5)),
-                    States.aliceTookSecondMulligan
-                )
-            }.isEqualTo(
-                InvalidPlayerAction(
-                    action = ChooseToKeepHand(toBottom = listOf(1, 4, 5)),
-                    state = States.aliceTookSecondMulligan,
-                    reason = "toBottom should have size 2 but has size 3"
-                )
-            )
-        }
-    }
-}
-
-private val cheatShuffler = CheatShuffler<Card>(ShuffleCheat.MoveOneCardToBottom)
+private val cheatShuffler by lazy { CheatShuffler<Card>(ShuffleCheat.MoveOneCardToBottom) }
 private fun List<Card>.shuffle(times: Int = 1) = (1..times).fold(this) { cards, _ ->
     cheatShuffler.shuffle(cards)
 }
 
-private object States {
+@DisplayName("Starting the Game")
+class StartingTheGameTest : StateTreeTest<GameState>(
+    reducer = masterReducer(),
+    root =
+    makeStateTree {
+        pendingRandomization(
+            state = startingState(listOf(DeckFactory.alice, DeckFactory.bob))
+        ).thenBranch(
+            "If Alice wins the coin flip, she gets to choose the starting player."(
+                ResolvedRandomization(
+                    listOf(DeckFactory.alice.shuffle(), DeckFactory.bob.shuffle()),
+                    listOf(PlayerStateFactory.ID_ALICE)
+                ) resultsIn MulliganStates.aliceWinsCoinToss
+                    .thenChain(
+                        "Once Alice chooses a starting player, all players draw their hands."(
+                            ChooseFirstPlayer(PlayerStateFactory.ID_BOB) resultsIn MulliganStates.drawnFirstHands
+                        ),
+                        "The starting player decides whether to keep or mulligan first."(
+                            ChooseToMulligan resultsIn MulliganStates.bobDecidedToTakeFirstMulligan
+                        ),
+                        "Then the next player chooses whether to mulligan, after which both players will mulligan simultaneously."(
+                            ChooseToMulligan resultsIn pendingRandomization()
+                        ),
+                        "Each player who chose to mulligan will draw a new hand of 7."(
+                            ResolvedRandomization(
+                                listOf(DeckFactory.alice.shuffle(2), DeckFactory.bob.shuffle(2))
+                            ) resultsIn MulliganStates.bothPlayersTookFirstMulligan
+                        ),
+                        "Bob decides to keep after first mulligan"(
+                            // 4th card to the bottom
+                            ChooseToKeepHand(toBottom = listOf(3))
+                                resultsIn MulliganStates.bobDecidedToKeepAfterFirstMulligan
+                        ),
+                        "Alice chooses to mulligan again"(
+                            ChooseToMulligan resultsIn pendingRandomization()
+                        ),
+                        "Alice performs her 2nd mulligan"(
+                            ResolvedRandomization(
+                                listOf(DeckFactory.alice.shuffle(3))
+                            ) resultsIn MulliganStates.aliceTookSecondMulligan
+                                .thenBranch(
+                                    "If Alex keeps and puts the correct number of cards on the bottom, the game starts"(
+                                        ChooseToKeepHand(
+                                            toBottom = listOf(
+                                                4,
+                                                5
+                                            )
+                                        ) // 5th and 6th card to the bottom
+                                            resultsIn MulliganStates.mulligansResolved
+                                    ),
+                                    "If Alex puts the wrong number of cards on the bottom, throw an error"(
+                                        ChooseToKeepHand(toBottom = listOf(1, 4, 5))
+                                            resultsIn InvalidPlayerAction(
+                                            action = ChooseToKeepHand(toBottom = listOf(1, 4, 5)),
+                                            state = MulliganStates.aliceTookSecondMulligan,
+                                            reason = "toBottom should have size 2 but has size 3"
+                                        )
+                                    )
+                                )
+                        )
+                    )
+            ),
+            "If Bob wins the coin flip, he gets to choose the starting player."(
+                ResolvedRandomization(
+                    listOf(DeckFactory.alice.shuffle(), DeckFactory.bob.shuffle()),
+                    listOf(PlayerStateFactory.ID_BOB)
+                ) resultsIn MulliganStates.bobWinsCoinToss
+            )
+        )
+    }
+)
+
+private object MulliganStates {
     // Hands we expect Alice and Bob to draw due to above shuffle cheating
     val expectedAliceHand1 = DeckFactory.alice.slice(1..7)
     val expectedAliceHand2 = DeckFactory.alice.slice(2..8)
     val expectedAliceHand3 = DeckFactory.alice.slice(3..9)
     val expectedBobHand1 = DeckFactory.bob.slice(1..7)
-    val expectedBobHand2 = DeckFactory.bob.slice(2..8)
 
+    val expectedBobHand2 = DeckFactory.bob.slice(2..8)
     val aliceWinsCoinToss by lazy {
         GameState(
             players = listOf(
@@ -166,6 +121,24 @@ private object States {
                 )
             ),
             gameStart = StartingPlayerMustBeChosen(PlayerStateFactory.ID_ALICE)
+        )
+    }
+
+    val bobWinsCoinToss by lazy {
+        GameState(
+            players = listOf(
+                PlayerState(
+                    id = PlayerStateFactory.ID_ALICE,
+                    library = DeckFactory.alice.shuffle(1),
+                    lifeTotal = 20
+                ),
+                PlayerState(
+                    id = PlayerStateFactory.ID_BOB,
+                    library = DeckFactory.bob.shuffle(1),
+                    lifeTotal = 20
+                )
+            ),
+            gameStart = StartingPlayerMustBeChosen(PlayerStateFactory.ID_BOB)
         )
     }
 
@@ -304,7 +277,6 @@ private object States {
             )
         )
     }
-
     val mulligansResolved by lazy {
         GameState(
             players = listOf(

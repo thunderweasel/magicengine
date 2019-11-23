@@ -3,6 +3,7 @@ package engine.acceptance
 import engine.acceptance.GameStateTree.OutcomeNode
 import engine.action.PlayerAction
 import engine.action.ResolvedRandomization
+import engine.model.StatePendingRandomization
 
 class TreeMaking<STATE_TYPE : Any> private constructor() {
     companion object {
@@ -44,6 +45,12 @@ class TreeMaking<STATE_TYPE : Any> private constructor() {
             expectedOutcome = OutcomeNode.Resolved(state = state)
         )
 
+    infix fun <STATE_TYPE> PlayerAction.resultsIn(error: Throwable) =
+        GameStateTree.Edge.PlayerChoice<STATE_TYPE>(
+            action = this,
+            expectedOutcome = OutcomeNode.CommandFailure(error = error)
+        )
+
     infix fun ResolvedRandomization.resultsIn(outcome: OutcomeNode<STATE_TYPE>) =
         GameStateTree.Edge.Possibility(action = this, expectedOutcome = outcome)
 
@@ -59,8 +66,16 @@ class TreeMaking<STATE_TYPE : Any> private constructor() {
     operator fun String.invoke(possibility: GameStateTree.Edge.Possibility<STATE_TYPE>): GameStateTree.Edge.Possibility<STATE_TYPE> =
         possibility.copy(description = this)
 
-    fun pendingRandomization(description: String? = null, vararg possibilities: GameStateTree.Edge.Possibility<STATE_TYPE>): OutcomeNode.PendingRandomization<STATE_TYPE> =
-        OutcomeNode.PendingRandomization(description = description, possibilities = possibilities.toList())
+    fun pendingRandomization(
+        description: String? = null,
+        state: StatePendingRandomization<STATE_TYPE>? = null,
+        vararg possibilities: GameStateTree.Edge.Possibility<STATE_TYPE>
+    ): OutcomeNode.PendingRandomization<STATE_TYPE> =
+        OutcomeNode.PendingRandomization(
+            description = description,
+            statePendingRandomization = state,
+            possibilities = possibilities.toList()
+        )
 
     private inline fun <reified T : GameStateTree.Edge<STATE_TYPE>> chain(vararg edges: GameStateTree.Edge<STATE_TYPE>): T {
         require(edges.isNotEmpty())
@@ -95,7 +110,9 @@ class TreeMaking<STATE_TYPE : Any> private constructor() {
         }
     }
 
-    private inline fun <reified T : GameStateTree.Edge<STATE_TYPE>> GameStateTree.Edge<STATE_TYPE>.withNewOutcome(outcome: OutcomeNode<STATE_TYPE>): T =
+    private inline fun <reified T : GameStateTree.Edge<STATE_TYPE>> GameStateTree.Edge<STATE_TYPE>.withNewOutcome(
+        outcome: OutcomeNode<STATE_TYPE>
+    ): T =
         when (this) {
             is GameStateTree.Edge.PlayerChoice -> copy(expectedOutcome = outcome)
             is GameStateTree.Edge.Possibility -> copy(expectedOutcome = outcome)

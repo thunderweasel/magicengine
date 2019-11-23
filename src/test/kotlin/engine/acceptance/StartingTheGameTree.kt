@@ -1,15 +1,10 @@
 package engine.acceptance
 
-import engine.acceptance.GameStateTree.Edge
-import engine.acceptance.GameStateTree.Edge.PlayerChoice
-import engine.acceptance.GameStateTree.Edge.Possibility
-import engine.acceptance.GameStateTree.OutcomeNode
 import engine.acceptance.GameStateTree.OutcomeNode.CommandFailure
-import engine.acceptance.TreeMaking.Companion.makeTree
+import engine.acceptance.TreeMaking.Companion.makeStateTree
 import engine.action.ChooseFirstPlayer
 import engine.action.ChooseToKeepHand
 import engine.action.ChooseToMulligan
-import engine.action.PlayerAction
 import engine.action.ResolvedRandomization
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
@@ -230,63 +225,61 @@ private object TreeStates {
 }
 
 val startingTheGameTree =
-    makeTree {
-        "At the start of the game, decks are shuffled and a random player gets to choose turn order."(
+    makeStateTree<GameState> {
+        pendingRandomization("At the start of the game, decks are shuffled and a random player gets to choose turn order.").thenBranch(
             "If Alice wins the coin flip, she gets to choose the starting player."(
                 ResolvedRandomization(
                     listOf(DeckFactory.alice.shuffle(), DeckFactory.bob.shuffle()),
                     listOf(PlayerStateFactory.ID_ALICE)
                 ) resultsIn
                     TreeStates.aliceWinsCoinToss
-                        .then(
-                            chain(
-                                "Once Alice chooses a starting player, all players draw their hands."(
-                                    ChooseFirstPlayer(PlayerStateFactory.ID_BOB) resultsIn TreeStates.drawnFirstHands
-                                ),
-                                "The starting player decides whether to keep or mulligan first."(
-                                    ChooseToMulligan resultsIn TreeStates.bobDecidedToTakeFirstMulligan
-                                ),
-                                "Then the next player chooses whether to mulligan, after which both players will mulligan simultaneously."(
-                                    ChooseToMulligan resultsIn pendingRandomization()
-                                ),
-                                "Each player who chose to mulligan will draw a new hand of 7."(
-                                    ResolvedRandomization(
-                                        listOf(DeckFactory.alice.shuffle(2), DeckFactory.bob.shuffle(2))
-                                    ) resultsIn TreeStates.bothPlayersTookFirstMulligan
-                                ),
-                                "Bob decides to keep after first mulligan"(
-                                    ChooseToKeepHand(toBottom = listOf(3)) // 4th card to the bottom
-                                        resultsIn TreeStates.bobDecidedToKeepAfterFirstMulligan
-                                ),
-                                "Alice chooses to mulligan again"(
-                                    ChooseToMulligan resultsIn pendingRandomization()
-                                ),
-                                "Alice performs her 2nd mulligan"(
-                                    ResolvedRandomization(
-                                        listOf(DeckFactory.alice.shuffle(3))
-                                    ) resultsIn TreeStates.aliceTookSecondMulligan
-                                        .then(
-                                            "If Alex keeps and puts the correct number of cards on the bottom, the game starts"(
-                                                ChooseToKeepHand(
-                                                    toBottom = listOf(
-                                                        4,
-                                                        5
-                                                    )
-                                                ) // 5th and 6th card to the bottom
-                                                    resultsIn TreeStates.mulligansResolved
-                                            ),
-                                            "If Alex puts the wrong number of cards on the bottom, throw an error"(
-                                                ChooseToKeepHand(toBottom = listOf(1, 4, 5))
-                                                    resultsIn CommandFailure(
-                                                    error = InvalidPlayerAction(
-                                                        action = ChooseToKeepHand(toBottom = listOf(1, 4, 5)),
-                                                        state = TreeStates.aliceTookSecondMulligan,
-                                                        reason = "toBottom should have size 2 but has size 3"
-                                                    )
+                        .thenChain(
+                            "Once Alice chooses a starting player, all players draw their hands."(
+                                ChooseFirstPlayer(PlayerStateFactory.ID_BOB) resultsIn TreeStates.drawnFirstHands
+                            ),
+                            "The starting player decides whether to keep or mulligan first."(
+                                ChooseToMulligan resultsIn TreeStates.bobDecidedToTakeFirstMulligan
+                            ),
+                            "Then the next player chooses whether to mulligan, after which both players will mulligan simultaneously."(
+                                ChooseToMulligan resultsIn pendingRandomization()
+                            ),
+                            "Each player who chose to mulligan will draw a new hand of 7."(
+                                ResolvedRandomization(
+                                    listOf(DeckFactory.alice.shuffle(2), DeckFactory.bob.shuffle(2))
+                                ) resultsIn TreeStates.bothPlayersTookFirstMulligan
+                            ),
+                            "Bob decides to keep after first mulligan"(
+                                ChooseToKeepHand(toBottom = listOf(3)) // 4th card to the bottom
+                                    resultsIn TreeStates.bobDecidedToKeepAfterFirstMulligan
+                            ),
+                            "Alice chooses to mulligan again"(
+                                ChooseToMulligan resultsIn pendingRandomization()
+                            ),
+                            "Alice performs her 2nd mulligan"(
+                                ResolvedRandomization(
+                                    listOf(DeckFactory.alice.shuffle(3))
+                                ) resultsIn TreeStates.aliceTookSecondMulligan
+                                    .thenBranch(
+                                        "If Alex keeps and puts the correct number of cards on the bottom, the game starts"(
+                                            ChooseToKeepHand(
+                                                toBottom = listOf(
+                                                    4,
+                                                    5
+                                                )
+                                            ) // 5th and 6th card to the bottom
+                                                resultsIn TreeStates.mulligansResolved
+                                        ),
+                                        "If Alex puts the wrong number of cards on the bottom, throw an error"(
+                                            ChooseToKeepHand(toBottom = listOf(1, 4, 5))
+                                                resultsIn CommandFailure(
+                                                error = InvalidPlayerAction(
+                                                    action = ChooseToKeepHand(toBottom = listOf(1, 4, 5)),
+                                                    state = TreeStates.aliceTookSecondMulligan,
+                                                    reason = "toBottom should have size 2 but has size 3"
                                                 )
                                             )
                                         )
-                                )
+                                    )
                             )
                         )
             ),
@@ -298,77 +291,3 @@ val startingTheGameTree =
             )
         )
     }
-
-class TreeMaking private constructor() {
-    companion object {
-        fun makeTree(makeRoot: TreeMaking.() -> OutcomeNode) = TreeMaking().makeRoot()
-    }
-
-    fun GameState.then(vararg choices: PlayerChoice): OutcomeNode.Resolved =
-        OutcomeNode.Resolved(state = this, choices = choices.toList())
-
-    fun OutcomeNode.Resolved.then(vararg choices: PlayerChoice): OutcomeNode.Resolved =
-        OutcomeNode.Resolved(state = state, choices = choices.toList())
-
-    operator fun String.invoke(vararg possibilities: Possibility): OutcomeNode.PendingRandomization =
-        OutcomeNode.PendingRandomization(description = this, possibilities = possibilities.toList())
-
-    infix fun PlayerAction.resultsIn(outcome: OutcomeNode) =
-        PlayerChoice(action = this, expectedOutcome = outcome)
-
-    infix fun PlayerAction.resultsIn(state: GameState) =
-        PlayerChoice(action = this, expectedOutcome = OutcomeNode.Resolved(state = state))
-
-    infix fun ResolvedRandomization.resultsIn(outcome: OutcomeNode) =
-        Possibility(action = this, expectedOutcome = outcome)
-
-    infix fun ResolvedRandomization.resultsIn(state: GameState) =
-        Possibility(
-            action = this,
-            expectedOutcome = OutcomeNode.Resolved(state = state)
-        )
-
-    operator fun String.invoke(choice: PlayerChoice): PlayerChoice =
-        choice.copy(description = this)
-
-    operator fun String.invoke(possibility: Possibility): Possibility =
-        possibility.copy(description = this)
-
-    fun pendingRandomization(vararg possibilities: Possibility): OutcomeNode.PendingRandomization =
-        OutcomeNode.PendingRandomization(possibilities = possibilities.toList())
-
-    inline fun <reified T : Edge> chain(vararg edges: Edge): T {
-        require(edges.isNotEmpty())
-        val firstEdge = edges.reduceRight(::chainTwo)
-        require(firstEdge is T)
-        return firstEdge
-    }
-
-    inline fun <reified T : Edge> chainTwo(current: Edge, prev: Edge): T {
-        val thisOutcome = prev.expectedOutcome
-        return when (current) {
-            is PlayerChoice -> {
-                require(thisOutcome is OutcomeNode.Resolved)
-                prev.withNewOutcome(
-                    thisOutcome.copy(
-                        choices = thisOutcome.choices.plus(current)
-                    )
-                )
-            }
-            is Possibility -> {
-                require(thisOutcome is OutcomeNode.PendingRandomization)
-                prev.withNewOutcome(
-                    thisOutcome.copy(
-                        possibilities = thisOutcome.possibilities.plus(current)
-                    )
-                )
-            }
-        }
-    }
-
-    inline fun <reified T : Edge> Edge.withNewOutcome(outcome: OutcomeNode): T =
-        when (this) {
-            is PlayerChoice -> copy(expectedOutcome = outcome)
-            is Possibility -> copy(expectedOutcome = outcome)
-        } as T
-}

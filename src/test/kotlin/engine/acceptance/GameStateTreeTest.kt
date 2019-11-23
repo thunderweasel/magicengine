@@ -1,8 +1,6 @@
 package engine.acceptance
 
-class GameStateTreeTest(
-    val root: GameStateTree.OutcomeNode.Resolved
-) {
+class GameStateTreeTest {
     // @TestFactory
     // fun createTests(): Collection<DynamicTest> {
     //

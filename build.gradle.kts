@@ -25,15 +25,13 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-tasks.withType<Test> {
+tasks.test {
     useJUnitPlatform()
 }
 
-tasks {
-    jacocoTestReport {
-        reports {
-            xml.isEnabled = true
-            html.isEnabled = false
-        }
+tasks.jacocoTestReport {
+    reports {
+        xml.isEnabled = true
+        html.isEnabled = false
     }
 }

@@ -3,6 +3,6 @@ package engine.action
 import engine.model.Card
 
 data class ResolvedRandomization(
-    val completedShuffles: List<List<Card>>,
-    val generatedNumbers: List<Int>
+    val completedShuffles: List<List<Card>> = emptyList(),
+    val generatedNumbers: List<Int> = emptyList()
 )

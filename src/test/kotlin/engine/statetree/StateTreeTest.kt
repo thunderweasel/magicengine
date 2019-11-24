@@ -1,11 +1,11 @@
-package engine.acceptance
+package engine.statetree
 
-import engine.acceptance.GameStateTree.Edge
-import engine.acceptance.GameStateTree.OutcomeNode
 import engine.action.GameAction
 import engine.action.RandomizedResultAction
 import engine.model.StatePendingRandomization
 import engine.model.noPendingRandomization
+import engine.statetree.GameStateTree.Edge
+import engine.statetree.GameStateTree.OutcomeNode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest
@@ -38,7 +38,7 @@ abstract class StateTreeTest<STATE_TYPE : Any>(
             else -> computePreviousState()
         }
         node.edges.forEach { edge: Edge<STATE_TYPE> ->
-            yield(DynamicTest.dynamicTest(edge.description ?: "BLARGH") {
+            yield(DynamicTest.dynamicTest(edge.description ?: edge.generateDescription()) {
                 runTest(previousState, edge)
             })
             createTests(
@@ -50,6 +50,12 @@ abstract class StateTreeTest<STATE_TYPE : Any>(
                 .forEach { yield(it) }
         }
     }
+
+    private fun Edge<STATE_TYPE>.generateDescription() =
+        when (this) {
+            is Edge.PlayerChoice<STATE_TYPE> -> "$action"
+            is Edge.Possibility<STATE_TYPE> -> "$action"
+        }
 
     private fun computeState(
         previousState: StatePendingRandomization<STATE_TYPE>,

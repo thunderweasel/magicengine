@@ -1,9 +1,9 @@
-package engine.acceptance
+package engine.statetree
 
-import engine.acceptance.GameStateTree.OutcomeNode
 import engine.action.PlayerAction
 import engine.action.ResolvedRandomization
 import engine.model.StatePendingRandomization
+import engine.statetree.GameStateTree.OutcomeNode
 
 class TreeMaking<STATE_TYPE : Any> private constructor() {
     companion object {
@@ -67,12 +67,10 @@ class TreeMaking<STATE_TYPE : Any> private constructor() {
         possibility.copy(description = this)
 
     fun pendingRandomization(
-        description: String? = null,
         state: StatePendingRandomization<STATE_TYPE>? = null,
         vararg possibilities: GameStateTree.Edge.Possibility<STATE_TYPE>
     ): OutcomeNode.PendingRandomization<STATE_TYPE> =
         OutcomeNode.PendingRandomization(
-            description = description,
             statePendingRandomization = state,
             possibilities = possibilities.toList()
         )

@@ -1,17 +1,15 @@
-package engine.acceptance
+package engine.statetree
 
-import engine.acceptance.GameStateTree.Edge.PlayerChoice
-import engine.acceptance.GameStateTree.Edge.Possibility
 import engine.action.PlayerAction
 import engine.action.ResolvedRandomization
 import engine.model.StatePendingRandomization
+import engine.statetree.GameStateTree.Edge.PlayerChoice
+import engine.statetree.GameStateTree.Edge.Possibility
 
 object GameStateTree {
     sealed class OutcomeNode<STATE_TYPE> {
-        abstract val description: String?
         abstract val edges: List<Edge<STATE_TYPE>>
         data class Resolved<STATE_TYPE>(
-            override val description: String? = null,
             val state: STATE_TYPE,
             val choices: List<PlayerChoice<STATE_TYPE>> = emptyList()
         ) : OutcomeNode<STATE_TYPE>() {
@@ -19,7 +17,6 @@ object GameStateTree {
         }
 
         data class PendingRandomization<STATE_TYPE>(
-            override val description: String? = null,
             val statePendingRandomization: StatePendingRandomization<STATE_TYPE>? = null,
             val possibilities: List<Possibility<STATE_TYPE>>
         ) : OutcomeNode<STATE_TYPE>() {
@@ -27,7 +24,6 @@ object GameStateTree {
         }
 
         data class CommandFailure<STATE_TYPE>(
-            override val description: String? = null,
             val error: Throwable
         ) : OutcomeNode<STATE_TYPE>() {
             override val edges = emptyList<Edge<STATE_TYPE>>()

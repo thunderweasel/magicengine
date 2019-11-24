@@ -1,13 +1,13 @@
-package engine.acceptance
+package engine.statetree
 
-import engine.acceptance.GameStateTree.Edge
-import engine.acceptance.GameStateTree.OutcomeNode
-import engine.acceptance.TreeMaking.Companion.makeStateTree
 import engine.action.ChooseFirstPlayer
 import engine.action.ChooseToKeepHand
 import engine.action.ChooseToMulligan
 import engine.action.ResolvedRandomization
 import engine.factories.PlayerStateFactory
+import engine.statetree.GameStateTree.Edge
+import engine.statetree.GameStateTree.OutcomeNode
+import engine.statetree.TreeMaking.Companion.makeStateTree
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -15,14 +15,16 @@ internal class TreeMakingTest {
     private data class MyState(val string: String)
 
     private val tree = makeStateTree<MyState> {
-        pendingRandomization("Beginning state pending randomization").thenBranch(
+        pendingRandomization().thenBranch(
             "If random number is 1"(
                 ResolvedRandomization(
                     generatedNumbers = listOf(1)
                 ) resultsIn MyState("1")
                     .thenChain(
                         "A - choice"(
-                            ChooseFirstPlayer(PlayerStateFactory.ID_ALICE) resultsIn MyState("1A")
+                            ChooseFirstPlayer(PlayerStateFactory.ID_ALICE) resultsIn MyState(
+                                "1A"
+                            )
                         ),
                         "B - choice resulting in randomization"(
                             ChooseToMulligan resultsIn pendingRandomization()
@@ -58,7 +60,9 @@ internal class TreeMakingTest {
                             ChooseToMulligan resultsIn MyState("2D")
                         ),
                         "is E"(
-                            ChooseToKeepHand(emptyList()) resultsIn MyState("2E")
+                            ChooseToKeepHand(emptyList()) resultsIn MyState(
+                                "2E"
+                            )
                         )
                     )
             )
@@ -66,7 +70,6 @@ internal class TreeMakingTest {
     }
 
     private val expectedTree: OutcomeNode<MyState> = OutcomeNode.PendingRandomization(
-        description = "Beginning state pending randomization",
         possibilities = listOf(
             Edge.Possibility(
                 "If random number is 1",
@@ -91,7 +94,9 @@ internal class TreeMakingTest {
                                                     description = "B - resolve random",
                                                     action = ResolvedRandomization(generatedNumbers = listOf(3)),
                                                     expectedOutcome = OutcomeNode.Resolved(
-                                                        state = MyState("1B3"),
+                                                        state = MyState(
+                                                            "1B3"
+                                                        ),
                                                         choices = listOf(
                                                             Edge.PlayerChoice(
                                                                 description = "C - Random branching",
@@ -104,7 +109,9 @@ internal class TreeMakingTest {
                                                                                 generatedNumbers = listOf(5)
                                                                             ),
                                                                             expectedOutcome = OutcomeNode.Resolved(
-                                                                                state = MyState("1B3C5")
+                                                                                state = MyState(
+                                                                                    "1B3C5"
+                                                                                )
                                                                             )
                                                                         ),
                                                                         Edge.Possibility(
@@ -113,7 +120,9 @@ internal class TreeMakingTest {
                                                                                 generatedNumbers = listOf(4)
                                                                             ),
                                                                             expectedOutcome = OutcomeNode.Resolved(
-                                                                                state = MyState("1B3C4")
+                                                                                state = MyState(
+                                                                                    "1B3C4"
+                                                                                )
                                                                             )
                                                                         )
                                                                     )

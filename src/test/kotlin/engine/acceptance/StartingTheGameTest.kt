@@ -1,6 +1,5 @@
 package engine.acceptance
 
-import engine.acceptance.TreeMaking.Companion.makeStateTree
 import engine.action.ChooseFirstPlayer
 import engine.action.ChooseToKeepHand
 import engine.action.ChooseToMulligan
@@ -19,14 +18,14 @@ import engine.model.StartingPlayerMustBeChosen
 import engine.random.CheatShuffler
 import engine.random.ShuffleCheat
 import engine.reducer.masterReducer
-import org.junit.jupiter.api.DisplayName
+import engine.statetree.StateTreeTest
+import engine.statetree.TreeMaking.Companion.makeStateTree
 
 private val cheatShuffler by lazy { CheatShuffler<Card>(ShuffleCheat.MoveOneCardToBottom) }
 private fun List<Card>.shuffle(times: Int = 1) = (1..times).fold(this) { cards, _ ->
     cheatShuffler.shuffle(cards)
 }
 
-@DisplayName("Starting the Game")
 class StartingTheGameTest : StateTreeTest<GameState>(
     reducer = masterReducer(),
     root =

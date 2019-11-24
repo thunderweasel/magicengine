@@ -27,17 +27,17 @@ import engine.model.pendingRandomization
 
 private const val STARTING_HAND_SIZE = 7
 
-val gameStartStateReducer: GameStatePendingRandomizationReducer = { action, state ->
+val gameStartStateReducer: GameStatePendingRandomizationReducer = { state, action ->
     when (state.gameState.gameStart) {
-        is StartingPlayerMustBeChosen -> firstPlayerMustBeChosenStateReduce(action, state.gameState)
-        is ResolvingMulligans -> mulliganStateReduce(action, state)
+        is StartingPlayerMustBeChosen -> firstPlayerMustBeChosenStateReduce(state.gameState, action)
+        is ResolvingMulligans -> mulliganStateReduce(state, action)
         else -> state // not handled by this reducer
     }
 }
 
 private fun firstPlayerMustBeChosenStateReduce(
-    action: GameAction,
-    state: GameState
+    state: GameState,
+    action: GameAction
 ): GameStatePendingRandomization {
     require(state.gameStart is StartingPlayerMustBeChosen)
     return when {
@@ -53,16 +53,16 @@ private fun firstPlayerMustBeChosenStateReduce(
                 gameStart = StartingPlayerMustBeChosen(action.resolvedRandomization.generatedNumbers.first())
             )
         action is ChooseFirstPlayer -> {
-            validateActingPlayer(action, state, state.gameStart.player!!)
+            validateActingPlayer(state, action, state.gameStart.player!!)
             drawOpeningHands(state, action)
         }
-        else -> throw actionDoesNotMatchState(action, state)
+        else -> throw actionDoesNotMatchState(state, action)
     }.noPendingRandomization()
 }
 
 private fun validateActingPlayer(
-    action: PlayerAction,
     state: GameState,
+    action: PlayerAction,
     expectedActingPlayer: PlayerId
 ) {
     if (action.actingPlayer != expectedActingPlayer) {
@@ -91,8 +91,8 @@ private fun drawOpeningHands(
     )
 
 private fun mulliganStateReduce(
-    action: GameAction,
-    state: GameStatePendingRandomization
+    state: GameStatePendingRandomization,
+    action: GameAction
 ): GameStatePendingRandomization {
     val gameState = state.gameState
     val mulliganState = gameState.gameStart
@@ -119,14 +119,14 @@ private fun mulliganStateReduce(
                 .noPendingRandomization()
         }
         else -> {
-            throw actionDoesNotMatchState(action, state.gameState)
+            throw actionDoesNotMatchState(state.gameState, action)
         }
     }
 }
 
 private fun actionDoesNotMatchState(
-    action: GameAction,
-    state: GameState
+    state: GameState,
+    action: GameAction
 ): InvalidPlayerAction {
     require(action is PlayerAction) { "Unhandled internal action!" }
     return InvalidPlayerAction(

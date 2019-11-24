@@ -25,7 +25,7 @@ class MagicEngine(
     }
 
     fun performAction(action: PlayerAction, state: GameState): GameState {
-        val gameStateAfterPlayerAction = reducer(action, state.noPendingRandomization())
+        val gameStateAfterPlayerAction = reducer(state.noPendingRandomization(), action)
         return randomizationResolver.resolve(gameStateAfterPlayerAction)
     }
 }

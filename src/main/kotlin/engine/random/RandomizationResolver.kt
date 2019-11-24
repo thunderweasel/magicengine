@@ -1,13 +1,13 @@
 package engine.random
 
-import engine.action.GameAction
 import engine.action.RandomizedResultAction
 import engine.action.ResolvedRandomization
 import engine.model.Card
 import engine.model.StatePendingRandomization
+import engine.reducer.StatePendingRandomizationReducer
 
 class RandomizationResolver<T>(
-    private val reducer: (GameAction, StatePendingRandomization<T>) -> StatePendingRandomization<T>,
+    private val reducer: StatePendingRandomizationReducer<T>,
     private val shuffler: Shuffler<Card>,
     private val randomizer: Randomizer
 ) {
@@ -22,7 +22,7 @@ class RandomizationResolver<T>(
                 generatedNumbers = pendingRandomization.randomNumbers.map { randomizer.randomInt(it.first, it.last) }
             )
             resolvingState =
-                reducer(RandomizedResultAction(pendingAction.actionOnResolution, resolvedRandomization), resolvingState)
+                reducer(resolvingState, RandomizedResultAction(pendingAction.actionOnResolution, resolvedRandomization))
         }
 
         return resolvingState.gameState

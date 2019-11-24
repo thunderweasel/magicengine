@@ -1,9 +1,9 @@
 package engine.statetree
 
-import engine.action.GameAction
 import engine.action.RandomizedResultAction
 import engine.model.StatePendingRandomization
 import engine.model.noPendingRandomization
+import engine.reducer.StatePendingRandomizationReducer
 import engine.statetree.GameStateTree.Edge
 import engine.statetree.GameStateTree.OutcomeNode
 import org.assertj.core.api.Assertions.assertThat
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 
 abstract class StateTreeTest<STATE_TYPE : Any>(
-    val reducer: (GameAction, StatePendingRandomization<STATE_TYPE>) -> StatePendingRandomization<STATE_TYPE>,
+    val reducer: StatePendingRandomizationReducer<STATE_TYPE>,
     val root: OutcomeNode<STATE_TYPE>
 ) {
     @TestFactory
@@ -69,16 +69,16 @@ abstract class StateTreeTest<STATE_TYPE : Any>(
         previousState: StatePendingRandomization<STATE_TYPE>,
         edge: Edge<STATE_TYPE>
     ) = when (edge) {
-        is Edge.PlayerChoice -> reducer(edge.action, previousState)
+        is Edge.PlayerChoice -> reducer(previousState, edge.action)
         is Edge.Possibility -> {
             val pendingAction = previousState.pendingAction
             require(pendingAction != null)
             reducer(
+                previousState,
                 RandomizedResultAction(
                     innerAction = pendingAction.actionOnResolution,
                     resolvedRandomization = edge.action
-                ),
-                previousState
+                )
             )
         }
     }

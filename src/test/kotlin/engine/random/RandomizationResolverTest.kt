@@ -14,15 +14,15 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class RandomizationResolverTest {
-    private var reducerCalls = mutableListOf<Pair<GameAction, StatePendingRandomization<String>>>()
+    private var reducerCalls = mutableListOf<Pair<StatePendingRandomization<String>, GameAction>>()
     private var statesToReturn = mutableListOf<StatePendingRandomization<String>>()
     private val sut = RandomizationResolver(
         shuffler = CheatShuffler(cheat = ShuffleCheat.MoveOneCardToBottom),
         randomizer = FakeRandomizer(
             listOf(1, 2, 3, 4, 5)
         ),
-        reducer = { action, state: StatePendingRandomization<String> ->
-            reducerCalls.add(action to state)
+        reducer = { state: StatePendingRandomization<String>, action ->
+            reducerCalls.add(state to action)
             val returnedState = statesToReturn.first()
             statesToReturn.removeAt(0)
             returnedState
@@ -55,14 +55,14 @@ class RandomizationResolverTest {
 
         assertThat(reducerCalls).isEqualTo(
             listOf(
-                randomizedResultAction(
+                initialState to randomizedResultAction(
                     // Deterministic due to shuffle cheating
                     completedShuffles = listOf(
                         listOf(KnownCard("2"), KnownCard("3"), KnownCard("1")),
                         listOf(KnownCard("B"), KnownCard("C"), KnownCard("A"))
                     ),
                     generatedNumbers = listOf(1, 2)
-                ) to initialState
+                )
             )
         )
         assertThat(resolved).isEqualTo("new state")
@@ -91,9 +91,9 @@ class RandomizationResolverTest {
 
         assertThat(reducerCalls).isEqualTo(
             listOf(
-                randomizedResultAction(generatedNumbers = listOf(1)) to initialState,
-                randomizedResultAction(generatedNumbers = listOf(2)) to expectedNewStates[0],
-                randomizedResultAction(generatedNumbers = listOf(3)) to expectedNewStates[1]
+                initialState to randomizedResultAction(generatedNumbers = listOf(1)),
+                expectedNewStates[0] to randomizedResultAction(generatedNumbers = listOf(2)),
+                expectedNewStates[1] to randomizedResultAction(generatedNumbers = listOf(3))
             )
         )
         assertThat(resolved).isEqualTo("final state")

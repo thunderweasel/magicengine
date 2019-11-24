@@ -4,7 +4,7 @@ import engine.action.ChooseFirstPlayer
 import engine.action.ChooseToKeepHand
 import engine.action.ChooseToMulligan
 import engine.action.ResolvedRandomization
-import engine.factories.PlayerStateFactory
+import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.statetree.GameStateTree.Edge
 import engine.statetree.GameStateTree.OutcomeNode
 import engine.statetree.TreeMaking.Companion.makeStateTree
@@ -22,12 +22,12 @@ internal class TreeMakingTest {
                 ) resultsIn MyState("1")
                     .thenChain(
                         "A - choice"(
-                            ChooseFirstPlayer(PlayerStateFactory.ID_ALICE) resultsIn MyState(
+                            ChooseFirstPlayer(ID_ALICE, ID_ALICE) resultsIn MyState(
                                 "1A"
                             )
                         ),
                         "B - choice resulting in randomization"(
-                            ChooseToMulligan resultsIn pendingRandomization()
+                            ChooseToMulligan(ID_ALICE) resultsIn pendingRandomization()
                         ),
                         "B - resolve random"(
                             ResolvedRandomization(
@@ -35,7 +35,7 @@ internal class TreeMakingTest {
                             ) resultsIn MyState("1B3")
                         ),
                         "C - Random branching"(
-                            ChooseToMulligan resultsIn pendingRandomization()
+                            ChooseToMulligan(ID_ALICE) resultsIn pendingRandomization()
                                 .thenBranch(
                                     "is 5"(
                                         ResolvedRandomization(
@@ -57,10 +57,10 @@ internal class TreeMakingTest {
                 ) resultsIn MyState("2")
                     .thenBranch(
                         "is D"(
-                            ChooseToMulligan resultsIn MyState("2D")
+                            ChooseToMulligan(ID_ALICE) resultsIn MyState("2D")
                         ),
                         "is E"(
-                            ChooseToKeepHand(emptyList()) resultsIn MyState(
+                            ChooseToKeepHand(ID_ALICE, emptyList()) resultsIn MyState(
                                 "2E"
                             )
                         )
@@ -81,13 +81,13 @@ internal class TreeMakingTest {
                     choices = listOf(
                         Edge.PlayerChoice(
                             description = "A - choice",
-                            action = ChooseFirstPlayer(PlayerStateFactory.ID_ALICE),
+                            action = ChooseFirstPlayer(ID_ALICE, ID_ALICE),
                             expectedOutcome = OutcomeNode.Resolved(
                                 state = MyState("1A"),
                                 choices = listOf(
                                     Edge.PlayerChoice(
                                         description = "B - choice resulting in randomization",
-                                        action = ChooseToMulligan,
+                                        action = ChooseToMulligan(ID_ALICE),
                                         expectedOutcome = OutcomeNode.PendingRandomization(
                                             possibilities = listOf(
                                                 Edge.Possibility(
@@ -100,7 +100,7 @@ internal class TreeMakingTest {
                                                         choices = listOf(
                                                             Edge.PlayerChoice(
                                                                 description = "C - Random branching",
-                                                                action = ChooseToMulligan,
+                                                                action = ChooseToMulligan(ID_ALICE),
                                                                 expectedOutcome = OutcomeNode.PendingRandomization(
                                                                     possibilities = listOf(
                                                                         Edge.Possibility(
@@ -150,14 +150,14 @@ internal class TreeMakingTest {
                     choices = listOf(
                         Edge.PlayerChoice(
                             description = "is D",
-                            action = ChooseToMulligan,
+                            action = ChooseToMulligan(ID_ALICE),
                             expectedOutcome = OutcomeNode.Resolved(
                                 state = MyState("2D")
                             )
                         ),
                         Edge.PlayerChoice(
                             description = "is E",
-                            action = ChooseToKeepHand(emptyList()),
+                            action = ChooseToKeepHand(ID_ALICE, emptyList()),
                             expectedOutcome = OutcomeNode.Resolved(
                                 state = MyState("2E")
                             )

@@ -15,8 +15,16 @@ internal class MagicEngineTest {
     fun `can start game and perform actions`() {
         val startGameState = sut.start2PlayerGame(DeckFactory.alice, DeckFactory.bob)
         assertThat(startGameState.gameStart).isInstanceOf(StartingPlayerMustBeChosen::class.java)
+        val gameStart = startGameState.gameStart as StartingPlayerMustBeChosen
+        assertThat(gameStart.player).isNotNull()
+        val winnerOfCoinToss = gameStart.player!!
 
-        val newState = sut.performAction(ChooseFirstPlayer(PlayerStateFactory.ID_ALICE), startGameState)
+        val newState = sut.performAction(
+            action = ChooseFirstPlayer(
+                actingPlayer = winnerOfCoinToss,
+                chosenPlayer = PlayerStateFactory.ID_ALICE
+            ), state = startGameState
+        )
         assertThat(newState.gameStart).isInstanceOf(ResolvingMulligans::class.java)
     }
 }

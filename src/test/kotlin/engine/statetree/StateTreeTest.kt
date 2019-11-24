@@ -30,24 +30,32 @@ abstract class StateTreeTest<STATE_TYPE : Any>(
         node: OutcomeNode<STATE_TYPE>,
         computePreviousState: () -> StatePendingRandomization<STATE_TYPE>? = { null }
     ): Sequence<DynamicNode> = sequence {
-        // Use the expected previous state if available so that we don't have to rely on computed state if a previous
-        // test fails.
-        val previousState = when {
-            node is OutcomeNode.Resolved -> node.state.noPendingRandomization()
-            node is OutcomeNode.PendingRandomization && node.statePendingRandomization != null -> node.statePendingRandomization
-            else -> computePreviousState()
-        }
         node.edges.forEach { edge: Edge<STATE_TYPE> ->
             yield(DynamicTest.dynamicTest(edge.description ?: edge.generateDescription()) {
-                runTest(previousState, edge)
+                runTest(getPreviousState(node, computePreviousState), edge)
             })
             createTests(
                 edge.expectedOutcome,
                 computePreviousState = {
-                    previousState?.let { kotlin.runCatching { computeState(previousState, edge) }.getOrNull() }
+                    getPreviousState(node, computePreviousState)?.let { previousState ->
+                        kotlin.runCatching { computeState(previousState, edge) }.getOrNull()
+                    }
                 }
             )
                 .forEach { yield(it) }
+        }
+    }
+
+    private fun getPreviousState(
+        node: OutcomeNode<STATE_TYPE>,
+        computePreviousState: () -> StatePendingRandomization<STATE_TYPE>?
+    ): StatePendingRandomization<STATE_TYPE>? {
+        // Use the expected previous state if available so that we don't have to rely on computed state if a previous
+        // test fails.
+        return when {
+            node is OutcomeNode.Resolved -> node.state.noPendingRandomization()
+            node is OutcomeNode.PendingRandomization && node.statePendingRandomization != null -> node.statePendingRandomization
+            else -> computePreviousState()
         }
     }
 
@@ -86,17 +94,22 @@ abstract class StateTreeTest<STATE_TYPE : Any>(
 
         when (val expectedOutcome = edge.expectedOutcome) {
             is OutcomeNode.PendingRandomization -> {
-                assertThat(newState.isSuccess).isTrue()
+                assertThat(newState.isSuccess)
+                    .describedAs("Expecting success")
+                    .isTrue()
                 assertThat(newState.getOrNull()?.pendingAction).isNotNull()
             }
             is OutcomeNode.Resolved -> {
-                assertThat(newState.isSuccess).isTrue()
+                assertThat(newState.isSuccess)
+                    .describedAs("Expecting success")
+                    .isTrue()
                 assertThat(newState.getOrNull()?.pendingAction).isNull()
                 assertThat(newState.getOrNull()?.gameState).isEqualTo(expectedOutcome.state)
             }
             is OutcomeNode.CommandFailure -> {
-                assertThat(newState.isFailure).isTrue()
-                assertThat(newState.exceptionOrNull()).isEqualTo(expectedOutcome.error)
+                assertThat(newState.exceptionOrNull())
+                    .describedAs("Expecting error")
+                    .isEqualTo(expectedOutcome.error)
             }
         }
     }

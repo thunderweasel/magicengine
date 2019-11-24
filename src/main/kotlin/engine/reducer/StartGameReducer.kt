@@ -7,6 +7,7 @@ import engine.action.ElectDeciderOfStartingPlayer
 import engine.action.GameAction
 import engine.action.PendingRandomization
 import engine.action.PerformMulligans
+import engine.action.PlayerAction
 import engine.action.RandomizedResultAction
 import engine.domain.drawCards
 import engine.domain.firstInTurnOrder
@@ -30,15 +31,16 @@ val gameStartStateReducer: GameStatePendingRandomizationReducer = { action, stat
     when (state.gameState.gameStart) {
         is StartingPlayerMustBeChosen -> firstPlayerMustBeChosenStateReduce(action, state.gameState)
         is ResolvingMulligans -> mulliganStateReduce(action, state)
-        else -> state
+        else -> state // not handled by this reducer
     }
 }
 
 private fun firstPlayerMustBeChosenStateReduce(
     action: GameAction,
     state: GameState
-): GameStatePendingRandomization =
-    when {
+): GameStatePendingRandomization {
+    require(state.gameStart is StartingPlayerMustBeChosen)
+    return when {
         action is RandomizedResultAction && action.innerAction == ElectDeciderOfStartingPlayer ->
             state.copy(
                 players = state.players
@@ -50,9 +52,27 @@ private fun firstPlayerMustBeChosenStateReduce(
                     },
                 gameStart = StartingPlayerMustBeChosen(action.resolvedRandomization.generatedNumbers.first())
             )
-        action is ChooseFirstPlayer -> drawOpeningHands(state, action)
-        else -> state
+        action is ChooseFirstPlayer -> {
+            validateActingPlayer(action, state, state.gameStart.player!!)
+            drawOpeningHands(state, action)
+        }
+        else -> throw actionDoesNotMatchState(action, state)
     }.noPendingRandomization()
+}
+
+private fun validateActingPlayer(
+    action: PlayerAction,
+    state: GameState,
+    expectedActingPlayer: PlayerId
+) {
+    if (action.actingPlayer != expectedActingPlayer) {
+        throw InvalidPlayerAction(
+            action = action,
+            state = state,
+            reason = "Player ${action.actingPlayer} is acting, but should be player $expectedActingPlayer"
+        )
+    }
+}
 
 private fun drawOpeningHands(
     state: GameState,
@@ -98,8 +118,22 @@ private fun mulliganStateReduce(
                 .eachPlayerWhoMulledDecidesWhetherToKeepAgain()
                 .noPendingRandomization()
         }
-        else -> state
+        else -> {
+            throw actionDoesNotMatchState(action, state.gameState)
+        }
     }
+}
+
+private fun actionDoesNotMatchState(
+    action: GameAction,
+    state: GameState
+): InvalidPlayerAction {
+    require(action is PlayerAction) { "Unhandled internal action!" }
+    return InvalidPlayerAction(
+        action = action,
+        state = state,
+        reason = "Action is invalid in current state"
+    )
 }
 
 private fun GameState.makeDecision(

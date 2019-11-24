@@ -81,7 +81,7 @@ class StartingTheGameTest : StateTreeTest<GameState>(
                                         ) // 5th and 6th card to the bottom
                                             resultsIn MulliganStates.gameStarted
                                     ),
-                                    "If Alice puts the wrong number of cards on the bottom, throw an error"(
+                                    "If Alice puts the wrong number of cards on the bottom, return invalid"(
                                         ChooseToKeepHand(ID_ALICE, toBottom = listOf(1, 4, 5))
                                             resultsIn InvalidPlayerAction(
                                             action = ChooseToKeepHand(ID_ALICE, toBottom = listOf(1, 4, 5)),
@@ -98,6 +98,37 @@ class StartingTheGameTest : StateTreeTest<GameState>(
                     listOf(DeckFactory.alice.shuffle(), DeckFactory.bob.shuffle()),
                     listOf(ID_BOB)
                 ) resultsIn MulliganStates.bobWinsCoinToss
+                    .thenBranch(
+                        "If Alice tries to choose the starting player, return invalid"(
+                            ChooseFirstPlayer(ID_ALICE, chosenPlayer = ID_ALICE) resultsIn
+                                InvalidPlayerAction(
+                                    action = ChooseFirstPlayer(ID_ALICE, chosenPlayer = ID_ALICE),
+                                    state = MulliganStates.bobWinsCoinToss,
+                                    reason = "Player 1 is acting, but should be player 2"
+                                )
+                        ),
+                        "Bob chooses the starting player"(
+                            ChooseFirstPlayer(ID_BOB, chosenPlayer = ID_BOB) resultsIn MulliganStates.drawnFirstHands
+                                .thenBranch(
+                                    "If Bob tries to choose the starting player again, return invalid"(
+                                        ChooseFirstPlayer(ID_BOB, chosenPlayer = ID_BOB) resultsIn
+                                            InvalidPlayerAction(
+                                                action = ChooseFirstPlayer(ID_BOB, chosenPlayer = ID_BOB),
+                                                state = MulliganStates.drawnFirstHands,
+                                                reason = "Action is invalid in current state"
+                                            )
+                                    )
+                                )
+                        ),
+                        "If Bob tries to do something other than choose a starting player, return invalid"(
+                            ChooseToMulligan(ID_BOB) resultsIn
+                                InvalidPlayerAction(
+                                    action = ChooseToMulligan(ID_BOB),
+                                    state = MulliganStates.bobWinsCoinToss,
+                                    reason = "Action is invalid in current state"
+                                )
+                        )
+                    )
             )
         )
     }

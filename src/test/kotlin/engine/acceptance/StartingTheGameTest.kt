@@ -20,12 +20,14 @@ import engine.random.ShuffleCheat
 import engine.reducer.masterReducer
 import engine.statetree.StateTreeTest
 import engine.statetree.TreeMaking.Companion.makeStateTree
+import org.junit.jupiter.api.DisplayName
 
 private val cheatShuffler by lazy { CheatShuffler<Card>(ShuffleCheat.MoveOneCardToBottom) }
 private fun List<Card>.shuffle(times: Int = 1) = (1..times).fold(this) { cards, _ ->
     cheatShuffler.shuffle(cards)
 }
 
+@DisplayName("103. Starting the Game")
 class StartingTheGameTest : StateTreeTest<GameState>(
     reducer = masterReducer(),
     root =
@@ -73,7 +75,7 @@ class StartingTheGameTest : StateTreeTest<GameState>(
                                                 5
                                             )
                                         ) // 5th and 6th card to the bottom
-                                            resultsIn MulliganStates.mulligansResolved
+                                            resultsIn MulliganStates.gameStarted
                                     ),
                                     "If Alex puts the wrong number of cards on the bottom, throw an error"(
                                         ChooseToKeepHand(toBottom = listOf(1, 4, 5))
@@ -276,7 +278,7 @@ private object MulliganStates {
             )
         )
     }
-    val mulligansResolved by lazy {
+    val gameStarted by lazy {
         GameState(
             players = listOf(
                 PlayerState(

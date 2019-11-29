@@ -20,5 +20,5 @@ fun GameState.viewAs(viewer: PlayerId): GameState =
                 library = player.library.map { Card.UnknownCard }
             )
         },
-        gameStart = gameStart
+        temporalPosition = temporalPosition
     )

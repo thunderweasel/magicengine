@@ -9,5 +9,5 @@ import kotlinx.serialization.Serializable
 data class GameState(
     val viewer: PlayerId? = null,
     val players: List<PlayerState>,
-    val gameStart: GameStart
+    val temporalPosition: TemporalPosition
 )

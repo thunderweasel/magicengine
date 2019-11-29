@@ -8,14 +8,16 @@ import engine.domain.startingState
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
+import engine.model.BeginningPhase
 import engine.model.Card
-import engine.model.GameStarted
 import engine.model.GameState
 import engine.model.InvalidPlayerAction
 import engine.model.MulliganDecision
 import engine.model.PlayerState
 import engine.model.ResolvingMulligans
 import engine.model.StartingPlayerMustBeChosen
+import engine.model.Turn
+import engine.model.UntapStep
 import engine.random.CheatShuffler
 import engine.random.ShuffleCheat
 import engine.reducer.masterReducer
@@ -156,7 +158,7 @@ private object MulliganStates {
                     lifeTotal = 20
                 )
             ),
-            gameStart = StartingPlayerMustBeChosen(ID_ALICE)
+            temporalPosition = StartingPlayerMustBeChosen(ID_ALICE)
         )
     }
 
@@ -174,7 +176,7 @@ private object MulliganStates {
                     lifeTotal = 20
                 )
             ),
-            gameStart = StartingPlayerMustBeChosen(ID_BOB)
+            temporalPosition = StartingPlayerMustBeChosen(ID_BOB)
         )
     }
 
@@ -194,7 +196,7 @@ private object MulliganStates {
                     hand = expectedBobHand1
                 )
             ),
-            gameStart = ResolvingMulligans(
+            temporalPosition = ResolvingMulligans(
                 numberOfMulligans = 0,
                 startingPlayer = ID_BOB,
                 turnToDecide = ID_BOB,
@@ -218,7 +220,7 @@ private object MulliganStates {
                     hand = emptyList()
                 )
             ),
-            gameStart = ResolvingMulligans(
+            temporalPosition = ResolvingMulligans(
                 numberOfMulligans = 0,
                 startingPlayer = ID_BOB,
                 turnToDecide = ID_ALICE,
@@ -248,7 +250,7 @@ private object MulliganStates {
                     library = DeckFactory.bob.shuffle(2).minus(elements = expectedBobHand2)
                 )
             ),
-            gameStart = ResolvingMulligans(
+            temporalPosition = ResolvingMulligans(
                 numberOfMulligans = 1,
                 startingPlayer = ID_BOB,
                 turnToDecide = ID_BOB,
@@ -277,7 +279,7 @@ private object MulliganStates {
                         .plus(expectedBobHand2[3])
                 )
             ),
-            gameStart = ResolvingMulligans(
+            temporalPosition = ResolvingMulligans(
                 numberOfMulligans = 1,
                 startingPlayer = ID_BOB,
                 turnToDecide = ID_ALICE,
@@ -302,7 +304,7 @@ private object MulliganStates {
                 // Bob is unchanged
                 bobDecidedToKeepAfterFirstMulligan.players[1]
             ),
-            gameStart = ResolvingMulligans(
+            temporalPosition = ResolvingMulligans(
                 numberOfMulligans = 2,
                 startingPlayer = ID_BOB,
                 turnToDecide = ID_ALICE,
@@ -329,7 +331,12 @@ private object MulliganStates {
                 // Bob is unchanged
                 aliceTookSecondMulligan.players[1]
             ),
-            gameStart = GameStarted(startingPlayer = ID_BOB)
+            temporalPosition = Turn(
+                activePlayer = ID_BOB,
+                phase = BeginningPhase(
+                    step = UntapStep
+                )
+            )
         )
     }
 }

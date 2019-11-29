@@ -27,7 +27,7 @@ class ViewAsTest {
                     hand = DeckFactory.bob.slice(0..6)
                 )
             ),
-            gameStart = ResolvingMulligans(
+            temporalPosition = ResolvingMulligans(
                 numberOfMulligans = 4,
                 startingPlayer = PlayerStateFactory.ID_BOB,
                 turnToDecide = PlayerStateFactory.ID_BOB,
@@ -62,7 +62,7 @@ class ViewAsTest {
                     )
                 ),
                 // Mulligan state is all open information
-                gameStart = ResolvingMulligans(
+                temporalPosition = ResolvingMulligans(
                     numberOfMulligans = 4,
                     startingPlayer = PlayerStateFactory.ID_BOB,
                     turnToDecide = PlayerStateFactory.ID_BOB,
@@ -99,7 +99,7 @@ class ViewAsTest {
                     )
                 ),
                 // Mulligan state is all open information
-                gameStart = ResolvingMulligans(
+                temporalPosition = ResolvingMulligans(
                     numberOfMulligans = 4,
                     startingPlayer = PlayerStateFactory.ID_BOB,
                     turnToDecide = PlayerStateFactory.ID_BOB,

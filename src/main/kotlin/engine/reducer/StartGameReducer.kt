@@ -12,7 +12,7 @@ import engine.action.RandomizedResultAction
 import engine.domain.drawCards
 import engine.domain.firstInTurnOrder
 import engine.domain.nextInTurnOrder
-import engine.model.GameStarted
+import engine.model.BeginningPhase
 import engine.model.GameState
 import engine.model.GameStatePendingRandomization
 import engine.model.InvalidPlayerAction
@@ -22,13 +22,15 @@ import engine.model.PlayerState
 import engine.model.RandomRequest
 import engine.model.ResolvingMulligans
 import engine.model.StartingPlayerMustBeChosen
+import engine.model.Turn
+import engine.model.UntapStep
 import engine.model.noPendingRandomization
 import engine.model.pendingRandomization
 
 private const val STARTING_HAND_SIZE = 7
 
-val gameStartStateReducer: GameStatePendingRandomizationReducer = { state, action ->
-    when (state.gameState.gameStart) {
+val gameStartReducer: GameStatePendingRandomizationReducer = { state, action ->
+    when (state.gameState.temporalPosition) {
         is StartingPlayerMustBeChosen -> firstPlayerMustBeChosenStateReduce(state.gameState, action)
         is ResolvingMulligans -> mulliganStateReduce(state, action)
         else -> state // not handled by this reducer
@@ -39,7 +41,7 @@ private fun firstPlayerMustBeChosenStateReduce(
     state: GameState,
     action: GameAction
 ): GameStatePendingRandomization {
-    require(state.gameStart is StartingPlayerMustBeChosen)
+    require(state.temporalPosition is StartingPlayerMustBeChosen)
     return when {
         action is RandomizedResultAction && action.innerAction == ElectDeciderOfStartingPlayer ->
             state.copy(
@@ -50,10 +52,10 @@ private fun firstPlayerMustBeChosenStateReduce(
                             library = shuffledDeck
                         )
                     },
-                gameStart = StartingPlayerMustBeChosen(action.resolvedRandomization.generatedNumbers.first())
+                temporalPosition = StartingPlayerMustBeChosen(action.resolvedRandomization.generatedNumbers.first())
             )
         action is ChooseFirstPlayer -> {
-            validateActingPlayer(state, action, state.gameStart.player!!)
+            validateActingPlayer(state, action, state.temporalPosition.player!!)
             drawOpeningHands(state, action)
         }
         else -> throw actionDoesNotMatchState(state, action)
@@ -80,7 +82,7 @@ private fun drawOpeningHands(
 ): GameState =
     state.copy(
         players = state.players.map { it.drawCards(STARTING_HAND_SIZE) },
-        gameStart = ResolvingMulligans(
+        temporalPosition = ResolvingMulligans(
             numberOfMulligans = 0,
             startingPlayer = action.chosenPlayer,
             turnToDecide = action.chosenPlayer,
@@ -95,7 +97,7 @@ private fun mulliganStateReduce(
     action: GameAction
 ): GameStatePendingRandomization {
     val gameState = state.gameState
-    val mulliganState = gameState.gameStart
+    val mulliganState = gameState.temporalPosition
     require(mulliganState is ResolvingMulligans)
     return when {
         action is ChooseToKeepHand -> {
@@ -139,11 +141,11 @@ private fun actionDoesNotMatchState(
 private fun GameState.makeDecision(
     mulliganDecision: MulliganDecision
 ): GameState {
-    require(gameStart is ResolvingMulligans)
+    require(temporalPosition is ResolvingMulligans)
     return copy(
-        gameStart = gameStart.copy(
+        temporalPosition = temporalPosition.copy(
             turnToDecide = nextPlayerAfterMulliganDecision(),
-            mulliganDecisions = gameStart.mulliganDecisions.plus(gameStart.turnToDecide to mulliganDecision)
+            mulliganDecisions = temporalPosition.mulliganDecisions.plus(temporalPosition.turnToDecide to mulliganDecision)
         )
     )
 }
@@ -174,8 +176,8 @@ private fun GameState.putCardsOnBottom(
 private fun GameState.performMulligans(
     action: RandomizedResultAction
 ): GameState {
-    require(gameStart is ResolvingMulligans)
-    val playersWhoMulled = players.filter(gameStart.whoMulled())
+    require(temporalPosition is ResolvingMulligans)
+    val playersWhoMulled = players.filter(temporalPosition.whoMulled())
     return copy(
         players = players.replacePlayerStates(
             action.resolvedRandomization.completedShuffles
@@ -188,8 +190,8 @@ private fun GameState.performMulligans(
                         .drawCards(STARTING_HAND_SIZE)
                 }
         ),
-        gameStart = gameStart.copy(
-            mulliganDecisions = gameStart.mulliganDecisions.plus(
+        temporalPosition = temporalPosition.copy(
+            mulliganDecisions = temporalPosition.mulliganDecisions.plus(
                 playersWhoMulled.map { it.id to MulliganDecision.UNDECIDED }
             )
         )
@@ -197,45 +199,48 @@ private fun GameState.performMulligans(
 }
 
 private fun GameState.eachPlayerWhoMulledDecidesWhetherToKeepAgain(): GameState {
-    require(gameStart is ResolvingMulligans)
+    require(temporalPosition is ResolvingMulligans)
     return copy(
-        gameStart = gameStart.copy(
-            numberOfMulligans = gameStart.numberOfMulligans + 1,
+        temporalPosition = temporalPosition.copy(
+            numberOfMulligans = temporalPosition.numberOfMulligans + 1,
             turnToDecide = firstInTurnOrder(
-                startingPlayer = gameStart.startingPlayer,
+                startingPlayer = temporalPosition.startingPlayer,
                 players = players,
-                filter = gameStart.whoAreUndecided()
+                filter = temporalPosition.whoAreUndecided()
             ) ?: throw IllegalStateException("Unexpected state: no players undecided after performing mulligans")
         )
     )
 }
 
 private fun GameState.nextPlayerAfterMulliganDecision(): PlayerId {
-    require(gameStart is ResolvingMulligans)
+    require(temporalPosition is ResolvingMulligans)
     return nextInTurnOrder(
-        current = gameStart.turnToDecide,
+        current = temporalPosition.turnToDecide,
         players = players,
-        filter = gameStart.whoAreUndecided()
-    ) ?: gameStart.startingPlayer
+        filter = temporalPosition.whoAreUndecided()
+    ) ?: temporalPosition.startingPlayer
 }
 
 private fun GameState.checkIfAllPlayersDecidedMulligans(): GameStatePendingRandomization {
-    require(gameStart is ResolvingMulligans)
+    require(temporalPosition is ResolvingMulligans)
     return when {
-        players.all(gameStart.whoKept()) ->
+        players.all(temporalPosition.whoKept()) ->
             startTheGame().noPendingRandomization()
-        players.any(gameStart.whoAreUndecided()) ->
+        players.any(temporalPosition.whoAreUndecided()) ->
             // do nothing
             this.noPendingRandomization()
         else ->
-            requestRandomizationForPlayersToShuffleDecks(gameStart)
+            requestRandomizationForPlayersToShuffleDecks(temporalPosition)
     }
 }
 
 private fun GameState.startTheGame(): GameState {
-    require(gameStart is ResolvingMulligans)
+    require(temporalPosition is ResolvingMulligans)
     return copy(
-        gameStart = GameStarted(startingPlayer = gameStart.startingPlayer)
+        temporalPosition = Turn(
+            activePlayer = temporalPosition.startingPlayer,
+            phase = BeginningPhase(step = UntapStep)
+        )
     )
 }
 

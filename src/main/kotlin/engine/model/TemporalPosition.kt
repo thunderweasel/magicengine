@@ -3,15 +3,19 @@ package engine.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class GameStart
+sealed class TemporalPosition
 @Serializable
-data class StartingPlayerMustBeChosen(val player: PlayerId?) : GameStart()
+data class StartingPlayerMustBeChosen(val player: PlayerId?) : TemporalPosition()
 @Serializable
 data class ResolvingMulligans(
     val numberOfMulligans: Int,
     val startingPlayer: PlayerId,
     val turnToDecide: PlayerId,
     val mulliganDecisions: Map<PlayerId, MulliganDecision>
-) : GameStart()
+) : TemporalPosition()
+
 @Serializable
-data class GameStarted(val startingPlayer: PlayerId) : GameStart()
+data class Turn(
+    val activePlayer: PlayerId,
+    val phase: TurnPhase
+) : TemporalPosition()

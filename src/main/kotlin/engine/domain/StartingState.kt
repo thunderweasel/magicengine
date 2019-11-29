@@ -20,7 +20,7 @@ fun startingState(
             lifeTotal = 20
         )
     },
-    gameStart = StartingPlayerMustBeChosen(player = null)
+    temporalPosition = StartingPlayerMustBeChosen(player = null)
 ).pendingRandomization(PendingRandomization(
     actionOnResolution = ElectDeciderOfStartingPlayer,
     request = RandomRequest(

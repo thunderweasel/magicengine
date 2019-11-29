@@ -239,6 +239,7 @@ private fun GameState.startTheGame(): GameState {
     return copy(
         temporalPosition = Turn(
             activePlayer = temporalPosition.startingPlayer,
+            priority = null,
             phase = BeginningPhase(step = UntapStep)
         )
     )

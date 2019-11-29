@@ -11,5 +11,6 @@ data class ChooseToKeepHand(
     override val actingPlayer: PlayerId,
     val toBottom: List<Int>
 ) : PlayerAction()
-
 data class ChooseToMulligan(override val actingPlayer: PlayerId) : PlayerAction()
+
+data class PassPriority(override val actingPlayer: PlayerId) : PlayerAction()

@@ -333,6 +333,7 @@ private object MulliganStates {
             ),
             temporalPosition = Turn(
                 activePlayer = ID_BOB,
+                priority = null,
                 phase = BeginningPhase(
                     step = UntapStep
                 )

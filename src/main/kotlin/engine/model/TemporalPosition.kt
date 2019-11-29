@@ -17,5 +17,6 @@ data class ResolvingMulligans(
 @Serializable
 data class Turn(
     val activePlayer: PlayerId,
-    val phase: TurnPhase
+    val phase: TurnPhase,
+    val priority: PlayerId?
 ) : TemporalPosition()

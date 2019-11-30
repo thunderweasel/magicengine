@@ -16,5 +16,6 @@ fun masterReducer(children: List<GameStatePendingRandomizationReducer> = childRe
         }
     }
 private val childReducers: List<GameStatePendingRandomizationReducer> = listOf(
-    gameStartReducer
+    gameStartReducer,
+    turnStepsReducer
 )

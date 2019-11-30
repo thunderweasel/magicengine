@@ -17,7 +17,7 @@ import engine.model.PlayerState
 import engine.model.ResolvingMulligans
 import engine.model.StartingPlayerMustBeChosen
 import engine.model.Turn
-import engine.model.UntapStep
+import engine.model.UpkeepStep
 import engine.random.CheatShuffler
 import engine.random.ShuffleCheat
 import engine.reducer.masterReducer
@@ -333,9 +333,9 @@ private object MulliganStates {
             ),
             temporalPosition = Turn(
                 activePlayer = ID_BOB,
-                priority = null,
+                priority = ID_BOB,
                 phase = BeginningPhase(
-                    step = UntapStep
+                    step = UpkeepStep
                 )
             )
         )

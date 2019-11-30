@@ -19,7 +19,7 @@ object PostCombatMainPhase : TurnPhase()
 @Serializable
 data class EndingPhase(
     val step: EndingStep
-)
+) : TurnPhase()
 
 @Serializable
 sealed class BeginningPhaseStep
@@ -35,7 +35,7 @@ sealed class CombatStep
 @Serializable
 object BeginningOfCombatStep : CombatStep()
 @Serializable
-object DeclareAttackerStep : CombatStep()
+object DeclareAttackersStep : CombatStep()
 @Serializable
 object DeclareBlockersStep : CombatStep()
 @Serializable

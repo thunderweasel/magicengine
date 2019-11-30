@@ -45,7 +45,7 @@ class TreeMaking<STATE_TYPE : Any> private constructor() {
             expectedOutcome = OutcomeNode.Resolved(state = state)
         )
 
-    infix fun <STATE_TYPE> PlayerAction.resultsIn(error: Throwable) =
+    infix fun PlayerAction.resultsIn(error: Throwable) =
         GameStateTree.Edge.PlayerChoice<STATE_TYPE>(
             action = this,
             expectedOutcome = OutcomeNode.CommandFailure(error = error)
@@ -107,6 +107,10 @@ class TreeMaking<STATE_TYPE : Any> private constructor() {
             }
         }
     }
+
+    data class PartialInvalidAction(
+        val reason: String
+    )
 
     private inline fun <reified T : GameStateTree.Edge<STATE_TYPE>> GameStateTree.Edge<STATE_TYPE>.withNewOutcome(
         outcome: OutcomeNode<STATE_TYPE>

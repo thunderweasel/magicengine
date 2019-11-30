@@ -12,7 +12,7 @@ import engine.action.RandomizedResultAction
 import engine.domain.drawCards
 import engine.domain.firstInTurnOrder
 import engine.domain.nextInTurnOrder
-import engine.model.BeginningPhase
+import engine.domain.startTurn
 import engine.model.GameState
 import engine.model.GameStatePendingRandomization
 import engine.model.InvalidPlayerAction
@@ -22,8 +22,6 @@ import engine.model.PlayerState
 import engine.model.RandomRequest
 import engine.model.ResolvingMulligans
 import engine.model.StartingPlayerMustBeChosen
-import engine.model.Turn
-import engine.model.UntapStep
 import engine.model.noPendingRandomization
 import engine.model.pendingRandomization
 
@@ -236,12 +234,8 @@ private fun GameState.checkIfAllPlayersDecidedMulligans(): GameStatePendingRando
 
 private fun GameState.startTheGame(): GameState {
     require(temporalPosition is ResolvingMulligans)
-    return copy(
-        temporalPosition = Turn(
-            activePlayer = temporalPosition.startingPlayer,
-            priority = null,
-            phase = BeginningPhase(step = UntapStep)
-        )
+    return startTurn(
+        activePlayer = temporalPosition.startingPlayer
     )
 }
 

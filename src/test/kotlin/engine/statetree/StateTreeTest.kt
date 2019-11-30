@@ -94,15 +94,15 @@ abstract class StateTreeTest<STATE_TYPE : Any>(
 
         when (val expectedOutcome = edge.expectedOutcome) {
             is OutcomeNode.PendingRandomization -> {
-                assertThat(newState.isSuccess)
-                    .describedAs("Expecting success")
-                    .isTrue()
+                assertThat(newState.exceptionOrNull())
+                    .describedAs("Expected no error")
+                    .isNull()
                 assertThat(newState.getOrNull()?.pendingAction).isNotNull()
             }
             is OutcomeNode.Resolved -> {
-                assertThat(newState.isSuccess)
-                    .describedAs("Expecting success")
-                    .isTrue()
+                assertThat(newState.exceptionOrNull())
+                    .describedAs("Expected no error")
+                    .isNull()
                 assertThat(newState.getOrNull()?.pendingAction).isNull()
                 assertThat(newState.getOrNull()?.gameState).isEqualTo(expectedOutcome.state)
             }

@@ -108,10 +108,6 @@ class TreeMaking<STATE_TYPE : Any> private constructor() {
         }
     }
 
-    data class PartialInvalidAction(
-        val reason: String
-    )
-
     private inline fun <reified T : GameStateTree.Edge<STATE_TYPE>> GameStateTree.Edge<STATE_TYPE>.withNewOutcome(
         outcome: OutcomeNode<STATE_TYPE>
     ): T =

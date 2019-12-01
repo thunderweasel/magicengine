@@ -7,9 +7,9 @@ import assertk.assertions.prop
 import assertk.assertions.support.expected
 import assertk.assertions.support.show
 import engine.action.RandomizedResultAction
-import engine.model.StatePendingRandomization
-import engine.model.noPendingRandomization
 import engine.reducer.StatePendingRandomizationReducer
+import engine.state.StatePendingRandomization
+import engine.state.noPendingRandomization
 import engine.statetree.GameStateTree.Edge
 import engine.statetree.GameStateTree.OutcomeNode
 import org.junit.jupiter.api.DynamicNode

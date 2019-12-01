@@ -11,13 +11,13 @@ import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
-import engine.model.BeginningPhase
-import engine.model.DrawStep
-import engine.model.GameState
-import engine.model.Turn
-import engine.model.UpkeepStep
-import engine.model.noPendingRandomization
 import engine.reducer.masterReducer
+import engine.state.BeginningPhase
+import engine.state.DrawStep
+import engine.state.GameState
+import engine.state.Turn
+import engine.state.UpkeepStep
+import engine.state.noPendingRandomization
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 

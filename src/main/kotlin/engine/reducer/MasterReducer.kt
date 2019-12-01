@@ -1,8 +1,8 @@
 package engine.reducer
 
 import engine.action.GameAction
-import engine.model.GameState
-import engine.model.StatePendingRandomization
+import engine.state.GameState
+import engine.state.StatePendingRandomization
 
 /**
  * All actions taken on the state are ultimately passed through this reducer. The contents of this file should be kept

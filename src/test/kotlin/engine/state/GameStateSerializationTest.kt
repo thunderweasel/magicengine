@@ -1,4 +1,4 @@
-package engine.model
+package engine.state
 
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo

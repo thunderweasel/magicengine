@@ -1,10 +1,10 @@
 package engine.domain
 
-import engine.model.BeginningPhase
-import engine.model.GameState
-import engine.model.PlayerId
-import engine.model.Turn
-import engine.model.UpkeepStep
+import engine.state.BeginningPhase
+import engine.state.GameState
+import engine.state.PlayerId
+import engine.state.Turn
+import engine.state.UpkeepStep
 
 fun GameState.startTurn(activePlayer: PlayerId, firstTurn: Boolean = false): GameState =
     // TODO: Untap step should occur (when, you know, permanents exist)

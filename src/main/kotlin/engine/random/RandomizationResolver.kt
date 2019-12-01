@@ -2,9 +2,9 @@ package engine.random
 
 import engine.action.RandomizedResultAction
 import engine.action.ResolvedRandomization
-import engine.model.Card
-import engine.model.StatePendingRandomization
 import engine.reducer.StatePendingRandomizationReducer
+import engine.state.Card
+import engine.state.StatePendingRandomization
 
 class RandomizationResolver<T>(
     private val reducer: StatePendingRandomizationReducer<T>,

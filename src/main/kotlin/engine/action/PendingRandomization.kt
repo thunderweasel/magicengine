@@ -1,6 +1,6 @@
 package engine.action
 
-import engine.model.RandomRequest
+import engine.state.RandomRequest
 import kotlinx.serialization.Serializable
 
 @Serializable

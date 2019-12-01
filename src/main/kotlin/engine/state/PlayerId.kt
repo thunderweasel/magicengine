@@ -1,3 +1,3 @@
-package engine.model
+package engine.state
 
 typealias PlayerId = Int

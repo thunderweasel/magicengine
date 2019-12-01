@@ -4,11 +4,11 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
-import engine.model.Card
-import engine.model.GameState
-import engine.model.MulliganDecision
-import engine.model.PlayerState
-import engine.model.ResolvingMulligans
+import engine.state.Card
+import engine.state.GameState
+import engine.state.MulliganDecision
+import engine.state.PlayerState
+import engine.state.ResolvingMulligans
 import org.junit.jupiter.api.Test
 
 class ViewAsTest {

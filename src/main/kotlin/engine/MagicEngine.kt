@@ -2,14 +2,14 @@ package engine
 
 import engine.action.PlayerAction
 import engine.domain.startingState
-import engine.model.Card
-import engine.model.GameState
-import engine.model.noPendingRandomization
 import engine.random.ActualRandomizer
 import engine.random.RandomShuffler
 import engine.random.RandomizationResolver
 import engine.reducer.GameStatePendingRandomizationReducer
 import engine.reducer.masterReducer
+import engine.state.Card
+import engine.state.GameState
+import engine.state.noPendingRandomization
 import kotlin.random.Random
 
 class MagicEngine(

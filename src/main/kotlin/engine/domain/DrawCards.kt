@@ -1,6 +1,6 @@
 package engine.domain
 
-import engine.model.PlayerState
+import engine.state.PlayerState
 
 fun PlayerState.drawCards(number: Int): PlayerState =
     copy(

@@ -5,7 +5,7 @@ import assertk.all
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import assertk.assertions.prop
-import engine.model.StatePendingRandomization
+import engine.state.StatePendingRandomization
 
 fun <STATE_TYPE> Assert<StatePendingRandomization<STATE_TYPE>>.matchesState(expected: STATE_TYPE) =
     all {

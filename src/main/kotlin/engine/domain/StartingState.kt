@@ -2,13 +2,13 @@ package engine.domain
 
 import engine.action.ElectDeciderOfStartingPlayer
 import engine.action.PendingRandomization
-import engine.model.Card
-import engine.model.GameState
-import engine.model.PlayerState
-import engine.model.RandomRequest
-import engine.model.Range
-import engine.model.StartingPlayerMustBeChosen
-import engine.model.pendingRandomization
+import engine.state.Card
+import engine.state.GameState
+import engine.state.PlayerState
+import engine.state.RandomRequest
+import engine.state.Range
+import engine.state.StartingPlayerMustBeChosen
+import engine.state.pendingRandomization
 
 fun startingState(
     playerDecks: List<List<Card>>

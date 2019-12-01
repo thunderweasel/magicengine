@@ -1,8 +1,8 @@
 package engine.reducer
 
-import engine.model.GameState
-import engine.model.PlayerId
-import engine.model.PlayerState
+import engine.state.GameState
+import engine.state.PlayerId
+import engine.state.PlayerState
 
 inline fun GameState.replacePlayerState(
     id: PlayerId,

@@ -1,6 +1,6 @@
 package engine.action
 
-import engine.model.PlayerId
+import engine.state.PlayerId
 
 sealed class PlayerAction : GameAction {
     abstract val actingPlayer: PlayerId

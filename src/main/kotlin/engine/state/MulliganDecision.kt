@@ -1,4 +1,4 @@
-package engine.model
+package engine.state
 
 enum class MulliganDecision {
     UNDECIDED,

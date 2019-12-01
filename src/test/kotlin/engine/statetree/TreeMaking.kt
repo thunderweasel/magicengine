@@ -2,7 +2,7 @@ package engine.statetree
 
 import engine.action.PlayerAction
 import engine.action.ResolvedRandomization
-import engine.model.StatePendingRandomization
+import engine.state.StatePendingRandomization
 import engine.statetree.GameStateTree.OutcomeNode
 
 class TreeMaking<STATE_TYPE : Any> private constructor() {

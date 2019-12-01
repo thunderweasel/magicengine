@@ -1,6 +1,6 @@
 package engine.factories
 
-import engine.model.Card.KnownCard
+import engine.state.Card.KnownCard
 
 object DeckFactory {
     val alice by lazy {

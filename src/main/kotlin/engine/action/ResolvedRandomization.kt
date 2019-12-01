@@ -1,6 +1,6 @@
 package engine.action
 
-import engine.model.Card
+import engine.state.Card
 
 data class ResolvedRandomization(
     val completedShuffles: List<List<Card>> = emptyList(),

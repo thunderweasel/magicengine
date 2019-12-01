@@ -5,23 +5,23 @@ import engine.action.PassPriority
 import engine.domain.drawCards
 import engine.domain.nextInTurnOrder
 import engine.domain.startTurn
-import engine.model.BeginningOfCombatStep
-import engine.model.BeginningPhase
-import engine.model.CombatPhase
-import engine.model.DeclareAttackersStep
-import engine.model.DrawStep
-import engine.model.EndOfCombatStep
-import engine.model.EndStep
-import engine.model.EndingPhase
-import engine.model.GameState
-import engine.model.InvalidPlayerAction
-import engine.model.PlayerId
-import engine.model.PostCombatMainPhase
-import engine.model.PreCombatMainPhase
-import engine.model.Turn
-import engine.model.TurnPhase
-import engine.model.UpkeepStep
-import engine.model.noPendingRandomization
+import engine.state.BeginningOfCombatStep
+import engine.state.BeginningPhase
+import engine.state.CombatPhase
+import engine.state.DeclareAttackersStep
+import engine.state.DrawStep
+import engine.state.EndOfCombatStep
+import engine.state.EndStep
+import engine.state.EndingPhase
+import engine.state.GameState
+import engine.state.InvalidPlayerAction
+import engine.state.PlayerId
+import engine.state.PostCombatMainPhase
+import engine.state.PreCombatMainPhase
+import engine.state.Turn
+import engine.state.TurnPhase
+import engine.state.UpkeepStep
+import engine.state.noPendingRandomization
 
 val turnStepsReducer: GameStatePendingRandomizationReducer = { state, action ->
     when (action) {

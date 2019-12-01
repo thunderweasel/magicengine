@@ -6,8 +6,8 @@ import assertk.assertions.isNotNull
 import engine.action.ChooseFirstPlayer
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
-import engine.model.ResolvingMulligans
-import engine.model.StartingPlayerMustBeChosen
+import engine.state.ResolvingMulligans
+import engine.state.StartingPlayerMustBeChosen
 import org.junit.jupiter.api.Test
 
 internal class MagicEngineTest {

@@ -3,7 +3,7 @@ package engine.domain
 import assertk.assertThat
 import assertk.assertions.containsOnly
 import engine.factories.PlayerStateFactory
-import engine.model.Card.KnownCard
+import engine.state.Card.KnownCard
 import org.junit.jupiter.api.Test
 
 class DrawCardsTest {

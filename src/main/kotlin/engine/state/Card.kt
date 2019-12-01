@@ -1,4 +1,4 @@
-package engine.model
+package engine.state
 
 import kotlinx.serialization.Serializable
 

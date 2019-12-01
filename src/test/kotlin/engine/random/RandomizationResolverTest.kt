@@ -8,11 +8,11 @@ import engine.action.PendingRandomization
 import engine.action.PerformMulligans
 import engine.action.RandomizedResultAction
 import engine.action.ResolvedRandomization
-import engine.model.Card
-import engine.model.Card.KnownCard
-import engine.model.RandomRequest
-import engine.model.Range
-import engine.model.StatePendingRandomization
+import engine.state.Card
+import engine.state.Card.KnownCard
+import engine.state.RandomRequest
+import engine.state.Range
+import engine.state.StatePendingRandomization
 import org.junit.jupiter.api.Test
 
 class RandomizationResolverTest {

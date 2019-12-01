@@ -1,7 +1,7 @@
 package engine.domain
 
-import engine.model.PlayerId
-import engine.model.PlayerState
+import engine.state.PlayerId
+import engine.state.PlayerState
 
 fun nextInTurnOrder(
     current: PlayerId,

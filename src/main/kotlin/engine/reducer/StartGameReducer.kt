@@ -13,17 +13,17 @@ import engine.domain.drawCards
 import engine.domain.firstInTurnOrder
 import engine.domain.nextInTurnOrder
 import engine.domain.startTurn
-import engine.model.GameState
-import engine.model.GameStatePendingRandomization
-import engine.model.InvalidPlayerAction
-import engine.model.MulliganDecision
-import engine.model.PlayerId
-import engine.model.PlayerState
-import engine.model.RandomRequest
-import engine.model.ResolvingMulligans
-import engine.model.StartingPlayerMustBeChosen
-import engine.model.noPendingRandomization
-import engine.model.pendingRandomization
+import engine.state.GameState
+import engine.state.GameStatePendingRandomization
+import engine.state.InvalidPlayerAction
+import engine.state.MulliganDecision
+import engine.state.PlayerId
+import engine.state.PlayerState
+import engine.state.RandomRequest
+import engine.state.ResolvingMulligans
+import engine.state.StartingPlayerMustBeChosen
+import engine.state.noPendingRandomization
+import engine.state.pendingRandomization
 
 private const val STARTING_HAND_SIZE = 7
 

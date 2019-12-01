@@ -1,7 +1,7 @@
 package engine.factories
 
-import engine.model.Card
-import engine.model.PlayerState
+import engine.state.Card
+import engine.state.PlayerState
 
 object PlayerStateFactory {
     const val ID_ALICE = 1

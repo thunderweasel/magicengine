@@ -2,7 +2,7 @@ package engine.statetree
 
 import engine.action.PlayerAction
 import engine.action.ResolvedRandomization
-import engine.model.StatePendingRandomization
+import engine.state.StatePendingRandomization
 import engine.statetree.GameStateTree.Edge.PlayerChoice
 import engine.statetree.GameStateTree.Edge.Possibility
 

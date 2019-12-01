@@ -21,4 +21,16 @@ class DrawCardsTest {
             KnownCard("4"), KnownCard("5")
         )
     }
+
+    @Test
+    fun `does not replace the cards already in the player's hand`() {
+        val newPlayerState = PlayerStateFactory.create(
+            hand = listOf("A", "B", "C").map { KnownCard(it) },
+            library = listOf("1", "2", "3", "4", "5").map { KnownCard(it) }
+        ).drawCards(1)
+
+        assertThat(newPlayerState.hand).containsOnly(
+            KnownCard("A"), KnownCard("B"), KnownCard("C"), KnownCard("1")
+        )
+    }
 }

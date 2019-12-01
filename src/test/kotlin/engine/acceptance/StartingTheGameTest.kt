@@ -336,7 +336,8 @@ private object MulliganStates {
                 priority = ID_BOB,
                 phase = BeginningPhase(
                     step = UpkeepStep
-                )
+                ),
+                firstTurn = true
             )
         )
     }

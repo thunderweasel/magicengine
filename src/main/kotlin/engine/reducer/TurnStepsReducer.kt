@@ -2,6 +2,7 @@ package engine.reducer
 
 import engine.action.DeclareAttackers
 import engine.action.PassPriority
+import engine.domain.drawCards
 import engine.domain.nextInTurnOrder
 import engine.domain.startTurn
 import engine.model.BeginningOfCombatStep
@@ -88,17 +89,32 @@ private fun goToNextStep(state: GameState, turn: Turn): GameState {
     return if (nextPhase == null) {
         endTurn(state, turn)
     } else {
-        state.copy(
-            temporalPosition = turn.copy(
-                phase = nextPhase,
-                priority = if (nextPhase == CombatPhase(step = DeclareAttackersStep)) {
-                    null // active player must declare attacks before receiving priority
-                } else {
-                    turn.activePlayer
-                }
-            )
-        )
+        startNextPhaseOrStep(state, turn, nextPhase)
     }
+}
+
+private fun startNextPhaseOrStep(
+    state: GameState,
+    turn: Turn,
+    nextPhase: TurnPhase
+): GameState {
+    return state.copy(
+        players = if (nextPhase == BeginningPhase(step = DrawStep) && !turn.firstTurn) {
+            state.replacePlayerState(turn.activePlayer) {
+                drawCards(1)
+            }
+        } else {
+            state.players
+        },
+        temporalPosition = turn.copy(
+            phase = nextPhase,
+            priority = if (nextPhase == CombatPhase(step = DeclareAttackersStep)) {
+                null // active player must declare attacks before receiving priority
+            } else {
+                turn.activePlayer
+            }
+        )
+    )
 }
 
 private fun nextPhase(current: TurnPhase): TurnPhase? {

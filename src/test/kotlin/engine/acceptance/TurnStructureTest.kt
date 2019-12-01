@@ -163,7 +163,8 @@ private object TurnStructureTreeStates {
         temporalPosition = Turn(
             activePlayer = ID_ALICE,
             phase = phase,
-            priority = priority
+            priority = priority,
+            firstTurn = true
         )
     )
 
@@ -175,7 +176,8 @@ private object TurnStructureTreeStates {
         temporalPosition = Turn(
             activePlayer = ID_BOB,
             phase = BeginningPhase(step = UpkeepStep),
-            priority = ID_BOB
+            priority = ID_BOB,
+            firstTurn = false
         )
     )
 }

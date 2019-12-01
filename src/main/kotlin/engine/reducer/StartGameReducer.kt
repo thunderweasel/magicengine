@@ -235,7 +235,8 @@ private fun GameState.checkIfAllPlayersDecidedMulligans(): GameStatePendingRando
 private fun GameState.startTheGame(): GameState {
     require(temporalPosition is ResolvingMulligans)
     return startTurn(
-        activePlayer = temporalPosition.startingPlayer
+        activePlayer = temporalPosition.startingPlayer,
+        firstTurn = true
     )
 }
 
@@ -253,20 +254,3 @@ private fun ResolvingMulligans.whoKept() = checkMulliganDecision(MulliganDecisio
 private fun ResolvingMulligans.whoMulled() = checkMulliganDecision(MulliganDecision.MULLIGAN)
 private fun ResolvingMulligans.whoAreUndecided() = checkMulliganDecision(MulliganDecision.UNDECIDED)
 private fun ResolvingMulligans.checkMulliganDecision(decision: MulliganDecision) = { it: PlayerState -> mulliganDecisions[it.id] == decision }
-
-private inline fun GameState.replacePlayerState(
-    id: PlayerId,
-    crossinline compute: PlayerState.() -> PlayerState
-) = players.map {
-    if (it.id == id) {
-        it.compute()
-    } else {
-        it
-    }
-}
-
-private fun List<PlayerState>.replacePlayerStates(
-    playersToReplace: List<PlayerState>
-) = map { existingPlayer ->
-    playersToReplace.firstOrNull { it.id == existingPlayer.id } ?: existingPlayer
-}

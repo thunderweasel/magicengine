@@ -18,5 +18,6 @@ data class ResolvingMulligans(
 data class Turn(
     val activePlayer: PlayerId,
     val phase: TurnPhase,
-    val priority: PlayerId?
+    val priority: PlayerId?,
+    val firstTurn: Boolean = false
 ) : TemporalPosition()

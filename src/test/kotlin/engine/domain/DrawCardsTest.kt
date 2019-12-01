@@ -1,8 +1,9 @@
 package engine.domain
 
+import assertk.assertThat
+import assertk.assertions.containsOnly
 import engine.factories.PlayerStateFactory
 import engine.model.Card.KnownCard
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class DrawCardsTest {
@@ -12,11 +13,11 @@ class DrawCardsTest {
             library = listOf("1", "2", "3", "4", "5").map { KnownCard(it) }
         ).drawCards(3)
 
-        assertThat(newPlayerState.hand).containsExactlyInAnyOrder(
+        assertThat(newPlayerState.hand).containsOnly(
             KnownCard("1"), KnownCard("2"), KnownCard("3")
         )
 
-        assertThat(newPlayerState.library).containsExactlyInAnyOrder(
+        assertThat(newPlayerState.library).containsOnly(
             KnownCard("4"), KnownCard("5")
         )
     }

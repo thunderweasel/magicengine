@@ -1,5 +1,7 @@
 package engine
 
+import assertk.assertThat
+import assertk.assertions.isDataClassEqualTo
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
 import engine.model.Card
@@ -7,7 +9,6 @@ import engine.model.GameState
 import engine.model.MulliganDecision
 import engine.model.PlayerState
 import engine.model.ResolvingMulligans
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class ViewAsTest {
@@ -40,7 +41,7 @@ class ViewAsTest {
 
     @Test
     fun `when viewing as Alice, hides information that should be hidden to Alice`() {
-        assertThat(exampleState.viewAs(PlayerStateFactory.ID_ALICE)).isEqualTo(
+        assertThat(exampleState.viewAs(PlayerStateFactory.ID_ALICE)).isDataClassEqualTo(
             GameState(
                 viewer = PlayerStateFactory.ID_ALICE,
                 players = listOf(
@@ -77,7 +78,7 @@ class ViewAsTest {
 
     @Test
     fun `when viewing as Bob, hides information that should be hidden to Bob`() {
-        assertThat(exampleState.viewAs(PlayerStateFactory.ID_BOB)).isEqualTo(
+        assertThat(exampleState.viewAs(PlayerStateFactory.ID_BOB)).isDataClassEqualTo(
             GameState(
                 viewer = PlayerStateFactory.ID_BOB,
                 players = listOf(

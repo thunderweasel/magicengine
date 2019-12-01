@@ -1,12 +1,13 @@
 package engine.model
 
+import assertk.assertThat
+import assertk.assertions.isDataClassEqualTo
 import engine.action.PendingRandomization
 import engine.action.PerformMulligans
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class GameStateSerializationTest {
@@ -49,6 +50,6 @@ class GameStateSerializationTest {
         val jsonString = json.stringify(StatePendingRandomization.serializer(GameState.serializer()), exampleState)
         val parsed = json.parse(StatePendingRandomization.serializer(GameState.serializer()), jsonString)
 
-        assertThat(parsed).isEqualTo(exampleState)
+        assertThat(parsed).isDataClassEqualTo(exampleState)
     }
 }

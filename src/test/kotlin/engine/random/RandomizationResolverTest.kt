@@ -1,5 +1,8 @@
 package engine.random
 
+import assertk.assertThat
+import assertk.assertions.isEmpty
+import assertk.assertions.isEqualTo
 import engine.action.GameAction
 import engine.action.PendingRandomization
 import engine.action.PerformMulligans
@@ -10,7 +13,6 @@ import engine.model.Card.KnownCard
 import engine.model.RandomRequest
 import engine.model.Range
 import engine.model.StatePendingRandomization
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class RandomizationResolverTest {

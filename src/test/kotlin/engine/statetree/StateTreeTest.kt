@@ -1,12 +1,17 @@
 package engine.statetree
 
+import assertk.Assert
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import assertk.assertions.prop
+import assertk.assertions.support.expected
+import assertk.assertions.support.show
 import engine.action.RandomizedResultAction
 import engine.model.StatePendingRandomization
 import engine.model.noPendingRandomization
 import engine.reducer.StatePendingRandomizationReducer
 import engine.statetree.GameStateTree.Edge
 import engine.statetree.GameStateTree.OutcomeNode
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
@@ -91,26 +96,42 @@ abstract class StateTreeTest<STATE_TYPE : Any>(
             "Previous state unavailable, possibly due to earlier failure"
         }
         val newState = kotlin.runCatching { computeState(previousState, edge) }
+        assertThat(newState).matchesOutcome(edge.expectedOutcome)
+    }
 
-        when (val expectedOutcome = edge.expectedOutcome) {
-            is OutcomeNode.PendingRandomization -> {
-                assertThat(newState.exceptionOrNull())
-                    .describedAs("Expected no error")
-                    .isNull()
-                assertThat(newState.getOrNull()?.pendingAction).isNotNull()
-            }
-            is OutcomeNode.Resolved -> {
-                assertThat(newState.exceptionOrNull())
-                    .describedAs("Expected no error")
-                    .isNull()
-                assertThat(newState.getOrNull()?.pendingAction).isNull()
-                assertThat(newState.getOrNull()?.gameState).isEqualTo(expectedOutcome.state)
-            }
+    private fun Assert<Result<StatePendingRandomization<STATE_TYPE>>>.matchesOutcome(expected: OutcomeNode<STATE_TYPE>) =
+        when (expected) {
             is OutcomeNode.CommandFailure -> {
-                assertThat(newState.exceptionOrNull())
-                    .describedAs("Expecting error")
-                    .isEqualTo(expectedOutcome.error)
+                prop(Result<StatePendingRandomization<STATE_TYPE>>::exceptionOrNull)
+                    .isEqualTo(expected.error)
+            }
+            is OutcomeNode.Resolved -> given { actual ->
+                val error = actual.exceptionOrNull()
+                val pendingAction = actual.getOrNull()?.pendingAction
+                val expectedPrefix = "resolved state: ${show(expected.state)}"
+                if (error != null) {
+                    expected("$expectedPrefix, but an error was returned instead: ${show(error)}")
+                }
+                if (pendingAction != null) {
+                    expected("$expectedPrefix, but the actual result is pending randomization: ${show(actual.getOrNull())}")
+                }
+                prop("getOrNull") { actual.getOrNull() }
+                    .prop(StatePendingRandomization<STATE_TYPE>::gameState)
+                    .isEqualTo(expected.state)
+            }
+            is OutcomeNode.PendingRandomization -> given { actual ->
+                val error = actual.exceptionOrNull()
+                val pendingAction = actual.getOrNull()?.pendingAction
+                if (error != null) {
+                    expected("pending randomization, but an error was returned instead: ${show(error)}")
+                }
+                if (pendingAction == null) {
+                    expected("pending randomization, but resolved state was returned instead: ${show(actual.getOrNull()?.gameState)}")
+                }
+                if (expected.statePendingRandomization != null) {
+                    prop("getOrNull") { actual.getOrNull() }
+                        .isEqualTo(expected.statePendingRandomization)
+                }
             }
         }
-    }
 }

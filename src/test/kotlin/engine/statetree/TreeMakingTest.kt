@@ -1,5 +1,7 @@
 package engine.statetree
 
+import assertk.assertThat
+import assertk.assertions.isEqualTo
 import engine.action.ChooseFirstPlayer
 import engine.action.ChooseToKeepHand
 import engine.action.ChooseToMulligan
@@ -8,7 +10,6 @@ import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.statetree.GameStateTree.Edge
 import engine.statetree.GameStateTree.OutcomeNode
 import engine.statetree.TreeMaking.Companion.makeStateTree
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class TreeMakingTest {

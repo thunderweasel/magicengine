@@ -19,7 +19,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
-    testImplementation("org.assertj:assertj-core:3.14.0")
+    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.20")
+
+    // For reflection in tests
+    testImplementation(kotlin("reflect"))
+    testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit"))
 }
 
 tasks.withType<KotlinCompile> {

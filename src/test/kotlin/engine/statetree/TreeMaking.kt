@@ -87,10 +87,10 @@ class TreeMaking<STATE_TYPE : Any> private constructor() {
         current: GameStateTree.Edge<STATE_TYPE>
     ): T {
         val prevOutcome = prev.expectedOutcome
-        require(prevOutcome.edges.isEmpty()) { "Only the last outcome in a chain is allowed to have multiple branches" }
+        require(prevOutcome.edges.isEmpty()) { "Invalid tree - only the last outcome in a chain is allowed to have multiple branches" }
         return when (current) {
             is GameStateTree.Edge.PlayerChoice -> {
-                require(prevOutcome is OutcomeNode.Resolved)
+                require(prevOutcome is OutcomeNode.Resolved) { "Invalid tree - player choice can only follow resolved game state" }
                 prev.withNewOutcome(
                     prevOutcome.copy(
                         choices = listOf(current)
@@ -98,7 +98,7 @@ class TreeMaking<STATE_TYPE : Any> private constructor() {
                 )
             }
             is GameStateTree.Edge.Possibility -> {
-                require(prevOutcome is OutcomeNode.PendingRandomization)
+                require(prevOutcome is OutcomeNode.PendingRandomization) { "Invalid tree - random result can only follow pending randomization" }
                 prev.withNewOutcome(
                     prevOutcome.copy(
                         possibilities = listOf(current)

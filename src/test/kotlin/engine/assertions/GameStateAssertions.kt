@@ -30,8 +30,19 @@ fun Assert<GameState>.actionResultsInError(
     action: PlayerAction,
     expectedError: Throwable
 ) = transform { actual ->
-    val reducer = masterReducer(format = EverythingIsAForest())
-    kotlin.runCatching { reducer(actual.noPendingRandomization(), action) }
+    actual.noPendingRandomization()
+}.actionResultsInError(
+    reducer = masterReducer(format = EverythingIsAForest()),
+    action = action,
+    expectedError = expectedError
+)
+
+fun <STATE_TYPE> Assert<StatePendingRandomization<STATE_TYPE>>.actionResultsInError(
+    reducer: StatePendingRandomizationReducer<STATE_TYPE>,
+    action: GameAction,
+    expectedError: Throwable
+) = transform { actual ->
+    kotlin.runCatching { reducer(actual, action) }
 }.prop("exceptionOrNull") { it.exceptionOrNull() }
     .isNotNull()
     .isEqualTo(expectedError)

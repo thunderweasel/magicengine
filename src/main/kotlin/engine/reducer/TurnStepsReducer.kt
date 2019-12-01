@@ -30,7 +30,7 @@ val turnStepsReducer: GameStatePendingRandomizationReducer = { state, action ->
     }
 }
 
-private val turnOrder = listOf(
+val turnPhases = listOf(
     // TODO: Will add this in when there are permanents to untap (no priority pass on untap step)
     // BeginningPhase(step = UntapStep),
     BeginningPhase(step = UpkeepStep),
@@ -101,9 +101,9 @@ private fun startNextPhaseOrStep(
 }
 
 private fun nextPhase(current: TurnPhase): TurnPhase? {
-    val currentIndex = turnOrder.indexOf(current)
+    val currentIndex = turnPhases.indexOf(current)
     require(currentIndex != -1) { "Unrecognized phase or step: $current" }
-    return turnOrder.getOrNull(currentIndex + 1)
+    return turnPhases.getOrNull(currentIndex + 1)
 }
 
 private fun endTurn(state: GameState, turn: Turn) =

@@ -19,5 +19,6 @@ data class Turn(
     val activePlayer: PlayerId,
     val phase: TurnPhase,
     val priority: PlayerId?,
-    val firstTurn: Boolean = false
+    val firstTurn: Boolean = false,
+    val history: TurnHistory = TurnHistory()
 ) : TemporalPosition()

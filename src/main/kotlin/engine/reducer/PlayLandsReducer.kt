@@ -6,6 +6,8 @@ import engine.state.Card
 import engine.state.GameState
 import engine.state.InvalidPlayerAction
 import engine.state.Permanent
+import engine.state.PostCombatMainPhase
+import engine.state.PreCombatMainPhase
 import engine.state.noPendingRandomization
 
 fun playLandsReducer(format: MagicFormat): GameStatePendingRandomizationReducer = { state, action ->
@@ -16,7 +18,7 @@ fun playLandsReducer(format: MagicFormat): GameStatePendingRandomizationReducer 
 }
 
 private fun playLand(state: GameState, action: PlayLand, format: MagicFormat): GameState {
-    mustBeActivePlayerWithPriority(state, action)
+    val turn = mustBeActivePlayerWithPriority(state, action)
     val card = state.player(action.actingPlayer).hand[action.indexInHand]
     if (card !is Card.KnownCard) {
         throw InvalidPlayerAction(
@@ -27,6 +29,20 @@ private fun playLand(state: GameState, action: PlayLand, format: MagicFormat): G
     }
     val cardSpec = format.cardLookup[card.name]
     require(cardSpec != null) { "Card is not valid in this format: $card" }
+    if (turn.history.numberOfLandsPlayed > 0) {
+        throw InvalidPlayerAction(
+            action = action,
+            state = state,
+            reason = "Player ${action.actingPlayer} cannot play another land this turn"
+        )
+    }
+    if (turn.phase !in setOf(PreCombatMainPhase, PostCombatMainPhase)) {
+        throw InvalidPlayerAction(
+            action = action,
+            state = state,
+            reason = "Lands can only be played during the active player's main phase"
+        )
+    }
     return state.copy(
         players = state.replacePlayerState(action.actingPlayer) {
             copy(
@@ -41,6 +57,11 @@ private fun playLand(state: GameState, action: PlayLand, format: MagicFormat): G
                 cardType = cardSpec.cardType,
                 subtype = cardSpec.subtype,
                 card = card
+            )
+        ),
+        temporalPosition = turn.copy(
+            history = turn.history.copy(
+                numberOfLandsPlayed = turn.history.numberOfLandsPlayed + 1
             )
         )
     )

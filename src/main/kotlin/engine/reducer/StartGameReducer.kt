@@ -56,7 +56,11 @@ private fun firstPlayerMustBeChosenStateReduce(
             validateActingPlayer(state, action, state.temporalPosition.player!!)
             drawOpeningHands(state, action)
         }
-        else -> throw actionDoesNotMatchState(state, action)
+        action is PlayerAction -> throw InvalidPlayerAction.invalidTemporalState(
+            action = action,
+            state = state
+        )
+        else -> throw IllegalArgumentException("Unhandled internal action!")
     }.noPendingRandomization()
 }
 
@@ -118,22 +122,14 @@ private fun mulliganStateReduce(
                 .eachPlayerWhoMulledDecidesWhetherToKeepAgain()
                 .noPendingRandomization()
         }
-        else -> {
-            throw actionDoesNotMatchState(state.gameState, action)
+        action is PlayerAction -> {
+            throw InvalidPlayerAction.invalidTemporalState(
+                action = action,
+                state = state.gameState
+            )
         }
+        else -> throw IllegalArgumentException("Unhandled internal action!")
     }
-}
-
-private fun actionDoesNotMatchState(
-    state: GameState,
-    action: GameAction
-): InvalidPlayerAction {
-    require(action is PlayerAction) { "Unhandled internal action!" }
-    return InvalidPlayerAction(
-        action = action,
-        state = state,
-        reason = "Action is invalid in current state"
-    )
 }
 
 private fun GameState.makeDecision(

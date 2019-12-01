@@ -2,6 +2,7 @@ package engine
 
 import engine.action.PlayerAction
 import engine.domain.startingState
+import engine.formats.MagicFormat
 import engine.random.ActualRandomizer
 import engine.random.RandomShuffler
 import engine.random.RandomizationResolver
@@ -13,9 +14,10 @@ import engine.state.noPendingRandomization
 import kotlin.random.Random
 
 class MagicEngine(
-    private val reducer: GameStatePendingRandomizationReducer = masterReducer(),
+    private val format: MagicFormat,
+    private val reducer: GameStatePendingRandomizationReducer = masterReducer(format = format),
     private val randomizationResolver: RandomizationResolver<GameState> = RandomizationResolver(
-        reducer = masterReducer(),
+        reducer = reducer,
         shuffler = RandomShuffler(Random.Default),
         randomizer = ActualRandomizer(Random.Default)
     )

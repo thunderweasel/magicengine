@@ -15,3 +15,4 @@ data class ChooseToMulligan(override val actingPlayer: PlayerId) : PlayerAction(
 
 data class PassPriority(override val actingPlayer: PlayerId) : PlayerAction()
 data class DeclareAttackers(override val actingPlayer: PlayerId) : PlayerAction() // TODO: should actually list attackers
+data class PlayLand(override val actingPlayer: PlayerId, val indexInHand: Int) : PlayerAction()

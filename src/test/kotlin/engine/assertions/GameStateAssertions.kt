@@ -3,9 +3,12 @@ package engine.assertions
 import assertk.Assert
 import assertk.all
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.prop
 import engine.action.GameAction
+import engine.action.PlayerAction
+import engine.formats.EverythingIsAForest
 import engine.reducer.StatePendingRandomizationReducer
 import engine.reducer.masterReducer
 import engine.state.GameState
@@ -18,10 +21,20 @@ fun Assert<GameState>.actionResultsInState(
 ) = transform { actual ->
     actual.noPendingRandomization()
 }.actionResultsInState(
-    reducer = masterReducer(),
+    reducer = masterReducer(format = EverythingIsAForest()),
     action = action,
     expectedState = expectedState
 )
+
+fun Assert<GameState>.actionResultsInError(
+    action: PlayerAction,
+    expectedError: Throwable
+) = transform { actual ->
+    val reducer = masterReducer(format = EverythingIsAForest())
+    kotlin.runCatching { reducer(actual.noPendingRandomization(), action) }
+}.prop("exceptionOrNull") { it.exceptionOrNull() }
+    .isNotNull()
+    .isEqualTo(expectedError)
 
 fun <STATE_TYPE> Assert<StatePendingRandomization<STATE_TYPE>>.actionResultsInState(
     reducer: StatePendingRandomizationReducer<STATE_TYPE>,

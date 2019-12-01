@@ -38,4 +38,15 @@ object PlayerStateFactory {
         library = DeckFactory.bob.minus(hand),
         lifeTotal = lifeTotal
     )
+
+    fun createAliceAndBobWithStartingHands(): List<PlayerState> = listOf(
+        createAliceWithStartingHand(),
+        createBobWithStartingHand()
+    )
+
+    fun createBobWithStartingHand() =
+        PlayerStateFactory.createBob(hand = DeckFactory.bob.slice(0..6))
+
+    fun createAliceWithStartingHand() =
+        PlayerStateFactory.createAlice(hand = DeckFactory.alice.slice(0..6))
 }

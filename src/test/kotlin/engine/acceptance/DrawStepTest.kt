@@ -7,11 +7,9 @@ import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
-import engine.reducer.masterReducer
 import engine.state.BeginningPhase
 import engine.state.DrawStep
 import engine.state.GameState
-import engine.state.PlayerState
 import engine.state.Turn
 import engine.state.UpkeepStep
 import org.junit.jupiter.api.DisplayName
@@ -19,12 +17,11 @@ import org.junit.jupiter.api.Test
 
 @DisplayName("504. Draw Step")
 class DrawStepTest {
-    private val reducer = masterReducer()
     @Test
     fun `on the first turn, active player does not draw a card`() {
         assertThat(
             GameState(
-                players = createPlayersWithStartingHands(),
+                players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
                 temporalPosition = Turn(
                     activePlayer = ID_ALICE,
                     phase = BeginningPhase(step = UpkeepStep),
@@ -35,7 +32,7 @@ class DrawStepTest {
         ).actionResultsInState(
             action = PassPriority(ID_BOB),
             expectedState = GameState(
-                players = createPlayersWithStartingHands(),
+                players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
                 temporalPosition = Turn(
                     activePlayer = ID_ALICE,
                     phase = BeginningPhase(step = DrawStep),
@@ -50,7 +47,7 @@ class DrawStepTest {
     fun `when it's not the first turn, active player draws a card`() {
         assertThat(
             GameState(
-                players = createPlayersWithStartingHands(),
+                players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
                 temporalPosition = Turn(
                     activePlayer = ID_BOB,
                     phase = BeginningPhase(step = UpkeepStep),
@@ -62,7 +59,7 @@ class DrawStepTest {
             action = PassPriority(ID_ALICE),
             expectedState = GameState(
                 players = listOf(
-                    createAliceWithStartingHand(),
+                    PlayerStateFactory.createAliceWithStartingHand(),
                     // Bob draws a card
                     PlayerStateFactory.createBob(hand = DeckFactory.bob.slice(0..7))
                 ),
@@ -75,15 +72,4 @@ class DrawStepTest {
             )
         )
     }
-
-    private fun createPlayersWithStartingHands(): List<PlayerState> = listOf(
-        createAliceWithStartingHand(),
-        createBobWithStartingHand()
-    )
-
-    private fun createBobWithStartingHand() =
-        PlayerStateFactory.createBob(hand = DeckFactory.bob.slice(0..6))
-
-    private fun createAliceWithStartingHand() =
-        PlayerStateFactory.createAlice(hand = DeckFactory.alice.slice(0..6))
 }

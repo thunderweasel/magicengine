@@ -8,6 +8,7 @@ import engine.domain.startingState
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
+import engine.formats.EverythingIsAForest
 import engine.random.CheatShuffler
 import engine.random.ShuffleCheat
 import engine.reducer.masterReducer
@@ -32,7 +33,7 @@ private fun List<Card>.shuffle(times: Int = 1) = (1..times).fold(this) { cards, 
 
 @DisplayName("103. Starting the Game")
 class StartingTheGameTest : StateTreeTest<GameState>(
-    reducer = masterReducer(),
+    reducer = masterReducer(format = EverythingIsAForest()),
     root =
     makeStateTree {
         pendingRandomization(
@@ -114,20 +115,18 @@ class StartingTheGameTest : StateTreeTest<GameState>(
                                 .thenBranch(
                                     "If Bob tries to choose the starting player again, return invalid"(
                                         ChooseFirstPlayer(ID_BOB, chosenPlayer = ID_BOB) resultsIn
-                                            InvalidPlayerAction(
+                                            InvalidPlayerAction.invalidTemporalState(
                                                 action = ChooseFirstPlayer(ID_BOB, chosenPlayer = ID_BOB),
-                                                state = MulliganStates.drawnFirstHands,
-                                                reason = "Action is invalid in current state"
+                                                state = MulliganStates.drawnFirstHands
                                             )
                                     )
                                 )
                         ),
                         "If Bob tries to do something other than choose a starting player, return invalid"(
                             ChooseToMulligan(ID_BOB) resultsIn
-                                InvalidPlayerAction(
+                                InvalidPlayerAction.invalidTemporalState(
                                     action = ChooseToMulligan(ID_BOB),
-                                    state = MulliganStates.bobWinsCoinToss,
-                                    reason = "Action is invalid in current state"
+                                    state = MulliganStates.bobWinsCoinToss
                                 )
                         )
                     )

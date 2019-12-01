@@ -14,7 +14,6 @@ import engine.state.EndOfCombatStep
 import engine.state.EndStep
 import engine.state.EndingPhase
 import engine.state.GameState
-import engine.state.InvalidPlayerAction
 import engine.state.PlayerId
 import engine.state.PostCombatMainPhase
 import engine.state.PreCombatMainPhase
@@ -50,16 +49,8 @@ private val turnOrder = listOf(
 )
 
 private fun passPriority(state: GameState, action: PassPriority): GameState {
-    val turn = state.temporalPosition
-    require(turn is Turn)
-    if (action.actingPlayer != turn.priority) {
-        throw InvalidPlayerAction(
-            action = action,
-            state = state,
-            reason = "Player ${action.actingPlayer} does not have priority"
-        )
-    }
-    val nextInPriority = nextInTurnOrder(turn.priority, state.players)
+    val turn = mustHavePriority(state, action)
+    val nextInPriority = nextInTurnOrder(action.actingPlayer, state.players)
     return if (nextInPriority == turn.activePlayer) {
         goToNextStep(state, turn)
     } else {
@@ -68,15 +59,7 @@ private fun passPriority(state: GameState, action: PassPriority): GameState {
 }
 
 private fun declareAttackers(state: GameState, action: DeclareAttackers): GameState {
-    val turn = state.temporalPosition
-    require(turn is Turn)
-    if (action.actingPlayer != turn.activePlayer) {
-        throw InvalidPlayerAction(
-            action = action,
-            state = state,
-            reason = "Player ${action.actingPlayer} is not the active player"
-        )
-    }
+    val turn = mustBeActivePlayer(state, action)
     return state.copy(
         temporalPosition = turn.copy(
             priority = turn.activePlayer

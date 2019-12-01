@@ -1,6 +1,7 @@
 package engine.reducer
 
 import engine.action.GameAction
+import engine.formats.MagicFormat
 import engine.state.GameState
 import engine.state.StatePendingRandomization
 
@@ -10,12 +11,16 @@ import engine.state.StatePendingRandomization
  */
 typealias StatePendingRandomizationReducer<T> = (StatePendingRandomization<T>, GameAction) -> StatePendingRandomization<T>
 typealias GameStatePendingRandomizationReducer = StatePendingRandomizationReducer<GameState>
-fun masterReducer(children: List<GameStatePendingRandomizationReducer> = childReducers): GameStatePendingRandomizationReducer = { state, action ->
+fun masterReducer(
+    format: MagicFormat,
+    children: List<GameStatePendingRandomizationReducer> = childReducers(format = format)
+): GameStatePendingRandomizationReducer = { state, action ->
         children.fold(state) { foldedState, reducer ->
             reducer(foldedState, action)
         }
     }
-private val childReducers: List<GameStatePendingRandomizationReducer> = listOf(
+private fun childReducers(format: MagicFormat) = listOf(
     gameStartReducer,
-    turnStepsReducer
+    turnStepsReducer,
+    playLandsReducer(format = format)
 )

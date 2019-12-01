@@ -7,6 +7,7 @@ import engine.action.PassPriority
 import engine.factories.PlayerStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
+import engine.formats.EverythingIsAForest
 import engine.reducer.masterReducer
 import engine.state.BeginningOfCombatStep
 import engine.state.BeginningPhase
@@ -30,7 +31,7 @@ import org.junit.jupiter.api.DisplayName
 
 @DisplayName("5. Turn Structure")
 class TurnStructureTest : StateTreeTest<GameState>(
-    reducer = masterReducer(),
+    reducer = masterReducer(format = EverythingIsAForest()),
     root = root
 )
 

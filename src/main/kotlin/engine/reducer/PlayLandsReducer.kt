@@ -54,8 +54,8 @@ private fun playLand(state: GameState, action: PlayLand, format: MagicFormat): G
         battlefield = state.battlefield.plus(
             Permanent(
                 name = cardSpec.name,
-                cardType = cardSpec.cardType,
-                subtype = cardSpec.subtype,
+                cardTypes = cardSpec.cardTypes,
+                subtypes = cardSpec.subtypes,
                 card = card
             )
         ),

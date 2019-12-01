@@ -11,7 +11,7 @@ class EverythingIsAForest : MagicFormat {
     override val cardLookup: CardSpecLookup = object : CardSpecLookup {
         override fun get(name: String) = BasicLand(
             name = name,
-            subtype = "Forest"
+            subtypes = listOf("Forest")
         )
     }
 }

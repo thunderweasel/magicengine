@@ -126,8 +126,8 @@ class PlayLandsTest {
             battlefield = listOf(
                 Permanent(
                     name = DeckFactory.alice[0].name,
-                    cardType = CardType.LAND,
-                    subtype = "Forest",
+                    cardTypes = listOf(CardType.LAND),
+                    subtypes = listOf("Forest"),
                     card = DeckFactory.alice[0]
                 )
             ),

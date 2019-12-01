@@ -6,7 +6,7 @@ package engine.cards
  */
 interface CardSpec {
     val name: String
-    val cardType: CardType
-    val subtype: String
+    val cardTypes: List<CardType>
+    val subtypes: List<String>
     val isBasicLand: Boolean
 }

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Permanent(
     val name: String,
-    val cardType: CardType,
-    val subtype: String,
-    val card: Card
+    val cardTypes: List<CardType>,
+    val subtypes: List<String>,
+    val card: Card?
 )

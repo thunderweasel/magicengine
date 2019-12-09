@@ -5,6 +5,7 @@ import engine.action.PassPriority
 import engine.action.PlayLand
 import engine.assertions.actionResultsInError
 import engine.assertions.actionResultsInState
+import engine.cards.AbilitySpecId
 import engine.cards.CardType
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
@@ -13,6 +14,7 @@ import engine.factories.PlayerStateFactory.ID_BOB
 import engine.formats.EverythingIsAForest
 import engine.reducer.masterReducer
 import engine.reducer.turnPhases
+import engine.state.ActivatedAbility
 import engine.state.BeginningPhase
 import engine.state.EndStep
 import engine.state.EndingPhase
@@ -26,6 +28,7 @@ import engine.state.Turn
 import engine.state.TurnHistory
 import engine.state.TurnPhase
 import engine.state.UpkeepStep
+import engine.state.createBattlefield
 import engine.state.noPendingRandomization
 import engine.viewAs
 import org.junit.jupiter.api.DisplayName
@@ -123,12 +126,19 @@ class PlayLandsTest {
                 ),
                 PlayerStateFactory.createBobWithStartingHand()
             ),
-            battlefield = listOf(
+            battlefield = createBattlefield(
                 Permanent(
+                    id = 1,
                     name = DeckFactory.alice[0].name,
                     cardTypes = listOf(CardType.LAND),
                     subtypes = listOf("Forest"),
-                    card = DeckFactory.alice[0]
+                    card = DeckFactory.alice[0],
+                    controller = ID_ALICE,
+                    activatedAbilities = listOf(ActivatedAbility(
+                        id = 1,
+                        permanentId = 1,
+                        specId = AbilitySpecId("Forest", 1)
+                    ))
                 )
             ),
             temporalPosition = Turn(

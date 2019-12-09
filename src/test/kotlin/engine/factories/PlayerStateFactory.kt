@@ -45,8 +45,8 @@ object PlayerStateFactory {
     )
 
     fun createBobWithStartingHand() =
-        PlayerStateFactory.createBob(hand = DeckFactory.bob.slice(0..6))
+        createBob(hand = DeckFactory.bob.slice(0..6))
 
     fun createAliceWithStartingHand() =
-        PlayerStateFactory.createAlice(hand = DeckFactory.alice.slice(0..6))
+        createAlice(hand = DeckFactory.alice.slice(0..6))
 }

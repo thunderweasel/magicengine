@@ -9,4 +9,5 @@ interface CardSpec {
     val cardTypes: List<CardType>
     val subtypes: List<String>
     val isBasicLand: Boolean
+    val activatedAbilities: List<ActivatedAbilitySpec>
 }

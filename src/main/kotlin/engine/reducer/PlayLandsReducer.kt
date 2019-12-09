@@ -2,12 +2,14 @@ package engine.reducer
 
 import engine.action.PlayLand
 import engine.formats.MagicFormat
+import engine.state.ActivatedAbility
 import engine.state.Card
 import engine.state.GameState
 import engine.state.InvalidPlayerAction
 import engine.state.Permanent
 import engine.state.PostCombatMainPhase
 import engine.state.PreCombatMainPhase
+import engine.state.adding
 import engine.state.noPendingRandomization
 
 fun playLandsReducer(format: MagicFormat): GameStatePendingRandomizationReducer = { state, action ->
@@ -51,12 +53,21 @@ private fun playLand(state: GameState, action: PlayLand, format: MagicFormat): G
                 }
             )
         },
-        battlefield = state.battlefield.plus(
+        battlefield = state.battlefield.adding(
             Permanent(
-                name = cardSpec.name,
+                id = 1, // TODO: ensure unique IDs
+                name = card.name,
                 cardTypes = cardSpec.cardTypes,
                 subtypes = cardSpec.subtypes,
-                card = card
+                card = card,
+                controller = action.actingPlayer,
+                activatedAbilities = cardSpec.activatedAbilities.map { abilitySpec ->
+                    ActivatedAbility(
+                        id = 1, // TODO: ensure unique IDs
+                        permanentId = 1,
+                        specId = abilitySpec.id
+                    )
+                }
             )
         ),
         temporalPosition = turn.copy(

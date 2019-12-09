@@ -9,6 +9,6 @@ import kotlinx.serialization.Serializable
 data class GameState(
     val viewer: PlayerId? = null,
     val players: List<PlayerState>,
-    val battlefield: List<Permanent> = emptyList(),
+    val battlefield: Battlefield = createBattlefield(),
     val temporalPosition: TemporalPosition
 )

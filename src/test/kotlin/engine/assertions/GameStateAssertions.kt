@@ -53,9 +53,9 @@ fun <STATE_TYPE> Assert<StatePendingRandomization<STATE_TYPE>>.actionResultsInSt
     expectedState: STATE_TYPE
 ) = transform { actual ->
     reducer(actual, action)
-}.matchesState(expectedState)
+}.isResolvedAs(expectedState)
 
-fun <STATE_TYPE> Assert<StatePendingRandomization<STATE_TYPE>>.matchesState(expected: STATE_TYPE) =
+fun <STATE_TYPE> Assert<StatePendingRandomization<STATE_TYPE>>.isResolvedAs(expected: STATE_TYPE) =
     all {
         prop(StatePendingRandomization<STATE_TYPE>::pendingAction).isNull()
         prop(StatePendingRandomization<STATE_TYPE>::gameState).isEqualTo(expected)

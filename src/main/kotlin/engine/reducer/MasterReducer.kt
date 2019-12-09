@@ -22,5 +22,6 @@ fun masterReducer(
 private fun childReducers(format: MagicFormat) = listOf(
     gameStartReducer,
     turnStepsReducer,
-    playLandsReducer(format = format)
+    playLandsReducer(format = format),
+    activateAbilityReducer(format = format)
 )

@@ -20,6 +20,7 @@ import engine.state.PreCombatMainPhase
 import engine.state.Turn
 import engine.state.TurnPhase
 import engine.state.UpkeepStep
+import engine.state.createManaPool
 import engine.state.noPendingRandomization
 
 val turnStepsReducer: GameStatePendingRandomizationReducer = { state, action ->
@@ -73,32 +74,39 @@ private fun goToNextStep(state: GameState, turn: Turn): GameState {
         endTurn(state, turn)
     } else {
         startNextPhaseOrStep(state, turn, nextPhase)
-    }
+    }.emptyManaPools()
 }
 
 private fun startNextPhaseOrStep(
     state: GameState,
     turn: Turn,
     nextPhase: TurnPhase
-): GameState {
-    return state.copy(
-        players = if (nextPhase == BeginningPhase(step = DrawStep) && !turn.firstTurn) {
-            state.replacePlayerState(turn.activePlayer) {
-                drawCards(1)
-            }
+): GameState = state.copy(
+    players = if (nextPhase == BeginningPhase(step = DrawStep) && !turn.firstTurn) {
+        state.replacePlayerState(turn.activePlayer) {
+            drawCards(1)
+        }
+    } else {
+        state.players
+    },
+    temporalPosition = turn.copy(
+        phase = nextPhase,
+        priority = if (nextPhase == CombatPhase(step = DeclareAttackersStep)) {
+            null // active player must declare attacks before receiving priority
         } else {
-            state.players
-        },
-        temporalPosition = turn.copy(
-            phase = nextPhase,
-            priority = if (nextPhase == CombatPhase(step = DeclareAttackersStep)) {
-                null // active player must declare attacks before receiving priority
-            } else {
-                turn.activePlayer
-            }
-        )
+            turn.activePlayer
+        }
     )
-}
+)
+
+private fun GameState.emptyManaPools() =
+    copy(
+        players = players.map {
+            it.copy(
+                manaPool = createManaPool()
+            )
+        }
+    )
 
 private fun nextPhase(current: TurnPhase): TurnPhase? {
     val currentIndex = turnPhases.indexOf(current)

@@ -45,9 +45,9 @@ private fun firstPlayerMustBeChosenStateReduce(
             state.copy(
                 players = state.players
                     .zip(action.resolvedRandomization.completedShuffles)
-                    .map { (playerState, shuffledDeck) ->
+                    .map { (playerState, shuffledIndices) ->
                         playerState.copy(
-                            library = shuffledDeck
+                            library = shuffledIndices.map { playerState.library[it] }
                         )
                     },
                 temporalPosition = StartingPlayerMustBeChosen(action.resolvedRandomization.generatedNumbers.first())
@@ -179,7 +179,7 @@ private fun GameState.performMulligans(
                 .map { (completedShuffle, playerState) ->
                     playerState
                         .copy(
-                            library = completedShuffle
+                            library = completedShuffle.map { playerState.library[it] }
                         )
                         .drawCards(STARTING_HAND_SIZE)
                 }
@@ -241,7 +241,7 @@ private fun GameState.requestRandomizationForPlayersToShuffleDecks(mulliganState
         PendingRandomization(
             actionOnResolution = PerformMulligans,
             request = RandomRequest(
-                shuffles = players.filter(mulliganState.whoMulled()).map(PlayerState::library)
+                shuffles = players.filter(mulliganState.whoMulled()).map { it.library.size }
             )
         )
     )

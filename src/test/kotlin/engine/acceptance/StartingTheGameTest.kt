@@ -6,14 +6,12 @@ import engine.action.ChooseToMulligan
 import engine.action.ResolvedRandomization
 import engine.domain.startingState
 import engine.factories.DeckFactory
+import engine.factories.GameStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
 import engine.formats.EverythingIsAForest
-import engine.random.CheatShuffler
-import engine.random.ShuffleCheat
 import engine.reducer.masterReducer
 import engine.state.BeginningPhase
-import engine.state.Card
 import engine.state.GameState
 import engine.state.InvalidPlayerAction
 import engine.state.MulliganDecision
@@ -26,10 +24,14 @@ import engine.statetree.StateTreeTest
 import engine.statetree.TreeMaking.Companion.makeStateTree
 import org.junit.jupiter.api.DisplayName
 
-private val cheatShuffler by lazy { CheatShuffler<Card>(ShuffleCheat.MoveOneCardToBottom) }
-private fun List<Card>.shuffle(times: Int = 1) = (1..times).fold(this) { cards, _ ->
-    cheatShuffler.shuffle(cards)
+// Every time we would shuffle in this test, we just move the top card to the bottom
+private fun <T> List<T>.shuffle(times: Int = 1) = (1..times).fold(this) { cards, _ ->
+    cards.drop(1).plus(cards[0])
 }
+private fun completedShuffles(numberOfDecks: Int) =
+    (1..numberOfDecks).map {
+        (0..59).toList().shuffle(times = 1)
+    }
 
 @DisplayName("103. Starting the Game")
 class StartingTheGameTest : StateTreeTest<GameState>(
@@ -37,11 +39,13 @@ class StartingTheGameTest : StateTreeTest<GameState>(
     root =
     makeStateTree {
         pendingRandomization(
-            state = startingState(listOf(DeckFactory.alice, DeckFactory.bob))
+            state = startingState(
+                playerDecks = listOf(DeckFactory.aliceCardNames, DeckFactory.bobCardNames)
+            )
         ).thenBranch(
             "If Alice wins the coin flip, she gets to choose the starting player."(
                 ResolvedRandomization(
-                    listOf(DeckFactory.alice.shuffle(), DeckFactory.bob.shuffle()),
+                    completedShuffles(numberOfDecks = 2),
                     listOf(ID_ALICE)
                 ) resultsIn MulliganStates.aliceWinsCoinToss
                     .thenChain(
@@ -58,7 +62,7 @@ class StartingTheGameTest : StateTreeTest<GameState>(
                         ),
                         "Each player who chose to mulligan will draw a new hand of 7."(
                             ResolvedRandomization(
-                                listOf(DeckFactory.alice.shuffle(2), DeckFactory.bob.shuffle(2))
+                                completedShuffles(numberOfDecks = 2)
                             ) resultsIn MulliganStates.bothPlayersTookFirstMulligan
                         ),
                         "Bob decides to keep after first mulligan"(
@@ -71,7 +75,7 @@ class StartingTheGameTest : StateTreeTest<GameState>(
                         ),
                         "Alice performs her 2nd mulligan"(
                             ResolvedRandomization(
-                                listOf(DeckFactory.alice.shuffle(3))
+                                completedShuffles(numberOfDecks = 1)
                             ) resultsIn MulliganStates.aliceTookSecondMulligan
                                 .thenBranch(
                                     "If Alice keeps and puts the correct number of cards on the bottom, the game starts"(
@@ -98,7 +102,7 @@ class StartingTheGameTest : StateTreeTest<GameState>(
             ),
             "If Bob wins the coin flip, he gets to choose the starting player."(
                 ResolvedRandomization(
-                    listOf(DeckFactory.alice.shuffle(), DeckFactory.bob.shuffle()),
+                    listOf((0..59).toList().shuffle(), (0..59).toList().shuffle()),
                     listOf(ID_BOB)
                 ) resultsIn MulliganStates.bobWinsCoinToss
                     .thenBranch(
@@ -136,15 +140,15 @@ class StartingTheGameTest : StateTreeTest<GameState>(
 )
 
 private object MulliganStates {
-    // Hands we expect Alice and Bob to draw due to above shuffle cheating
+    // Hands we expect Alice and Bob to draw due to cheat shuffling above
     val expectedAliceHand1 = DeckFactory.alice.slice(1..7)
     val expectedAliceHand2 = DeckFactory.alice.slice(2..8)
     val expectedAliceHand3 = DeckFactory.alice.slice(3..9)
     val expectedBobHand1 = DeckFactory.bob.slice(1..7)
-
     val expectedBobHand2 = DeckFactory.bob.slice(2..8)
+
     val aliceWinsCoinToss by lazy {
-        GameState(
+        GameStateFactory.create(
             players = listOf(
                 PlayerState(
                     id = ID_ALICE,
@@ -162,7 +166,7 @@ private object MulliganStates {
     }
 
     val bobWinsCoinToss by lazy {
-        GameState(
+        GameStateFactory.create(
             players = listOf(
                 PlayerState(
                     id = ID_ALICE,
@@ -180,7 +184,7 @@ private object MulliganStates {
     }
 
     val drawnFirstHands by lazy {
-        GameState(
+        GameStateFactory.create(
             players = listOf(
                 PlayerState(
                     id = ID_ALICE,
@@ -208,7 +212,7 @@ private object MulliganStates {
     }
 
     val bobDecidedToTakeFirstMulligan by lazy {
-        GameState(
+        GameStateFactory.create(
             players = listOf(
                 // Alice is unchanged
                 drawnFirstHands.players[0],
@@ -232,7 +236,7 @@ private object MulliganStates {
     }
 
     val bothPlayersTookFirstMulligan by lazy {
-        GameState(
+        GameStateFactory.create(
             players = listOf(
                 PlayerState(
                     id = ID_ALICE,
@@ -263,7 +267,7 @@ private object MulliganStates {
     }
 
     val bobDecidedToKeepAfterFirstMulligan by lazy {
-        GameState(
+        GameStateFactory.create(
             players = listOf(
                 // Alice is unchanged
                 bothPlayersTookFirstMulligan.players[0],
@@ -291,7 +295,7 @@ private object MulliganStates {
     }
 
     val aliceTookSecondMulligan by lazy {
-        GameState(
+        GameStateFactory.create(
             players = listOf(
                 PlayerState(
                     id = ID_ALICE,
@@ -315,7 +319,7 @@ private object MulliganStates {
         )
     }
     val gameStarted by lazy {
-        GameState(
+        GameStateFactory.create(
             players = listOf(
                 PlayerState(
                     id = ID_ALICE,

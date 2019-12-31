@@ -4,12 +4,12 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import engine.domain.ManaType
+import engine.factories.GameStateFactory
 import engine.factories.PermanentFactory
 import engine.factories.PlayerStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.state.BeginningOfCombatStep
 import engine.state.CombatPhase
-import engine.state.GameState
 import engine.state.Turn
 import engine.state.createBattlefield
 import engine.state.createManaPool
@@ -55,10 +55,10 @@ internal class BasicLandSpecTest {
         }
     }
 
-    private fun createInitialState(spec: BasicLandSpec) = GameState(
+    private fun createInitialState(spec: BasicLandSpec) = GameStateFactory.create(
         players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
         battlefield = createBattlefield(
-            PermanentFactory.createBasicLand(spec, id = 1, owner = ID_ALICE)
+            PermanentFactory.createBasicLand(spec, permanentId = 1, owner = ID_ALICE)
         ),
         temporalPosition = Turn(
             activePlayer = ID_ALICE,

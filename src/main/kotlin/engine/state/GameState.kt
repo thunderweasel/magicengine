@@ -10,5 +10,6 @@ data class GameState(
     val viewer: PlayerId? = null,
     val players: List<PlayerState>,
     val battlefield: Battlefield = createBattlefield(),
-    val temporalPosition: TemporalPosition
+    val temporalPosition: TemporalPosition,
+    val nextCardId: CardId
 )

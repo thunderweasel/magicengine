@@ -8,8 +8,6 @@ import engine.action.PendingRandomization
 import engine.action.PerformMulligans
 import engine.action.RandomizedResultAction
 import engine.action.ResolvedRandomization
-import engine.state.Card
-import engine.state.Card.KnownCard
 import engine.state.RandomRequest
 import engine.state.Range
 import engine.state.StatePendingRandomization
@@ -44,10 +42,7 @@ class RandomizationResolverTest {
         val initialState = StatePendingRandomization(
             gameState = "state",
             pendingAction = pendingAction(
-                shuffles = listOf(
-                    listOf(KnownCard("1"), KnownCard("2"), KnownCard("3")),
-                    listOf(KnownCard("A"), KnownCard("B"), KnownCard("C"))
-                ),
+                shuffles = listOf(3, 5),
                 randomNumbers = listOf(1..2, 2..3)
             )
         )
@@ -60,8 +55,8 @@ class RandomizationResolverTest {
                 initialState to randomizedResultAction(
                     // Deterministic due to shuffle cheating
                     completedShuffles = listOf(
-                        listOf(KnownCard("2"), KnownCard("3"), KnownCard("1")),
-                        listOf(KnownCard("B"), KnownCard("C"), KnownCard("A"))
+                        listOf(1, 2, 0),
+                        listOf(1, 2, 3, 4, 0)
                     ),
                     generatedNumbers = listOf(1, 2)
                 )
@@ -101,7 +96,7 @@ class RandomizationResolverTest {
         assertThat(resolved).isEqualTo("final state")
     }
 
-    private fun pendingAction(shuffles: List<List<Card>> = emptyList(), randomNumbers: List<IntRange> = emptyList()) =
+    private fun pendingAction(shuffles: List<Int> = emptyList(), randomNumbers: List<IntRange> = emptyList()) =
         PendingRandomization(
             actionOnResolution = PerformMulligans,
             request = RandomRequest(
@@ -111,7 +106,7 @@ class RandomizationResolverTest {
         )
 
     private fun randomizedResultAction(
-        completedShuffles: List<List<Card>> = emptyList(),
+        completedShuffles: List<List<Int>> = emptyList(),
         generatedNumbers: List<Int> = emptyList()
     ) =
         RandomizedResultAction(

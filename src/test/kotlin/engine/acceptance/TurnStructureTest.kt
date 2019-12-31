@@ -4,7 +4,7 @@ import engine.acceptance.TurnStructureTreeStates.stateWith
 import engine.acceptance.TurnStructureTreeStates.turn2Upkeep
 import engine.action.DeclareAttackers
 import engine.action.PassPriority
-import engine.factories.PlayerStateFactory
+import engine.factories.GameStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
 import engine.formats.EverythingIsAForest
@@ -156,11 +156,7 @@ private val root = makeStateTree<GameState> {
 
 private object TurnStructureTreeStates {
 
-    fun stateWith(phase: TurnPhase, priority: PlayerId?) = GameState(
-        players = listOf(
-            PlayerStateFactory.createAlice(),
-            PlayerStateFactory.createBob()
-        ),
+    fun stateWith(phase: TurnPhase, priority: PlayerId?) = GameStateFactory.create(
         temporalPosition = Turn(
             activePlayer = ID_ALICE,
             phase = phase,
@@ -169,11 +165,7 @@ private object TurnStructureTreeStates {
         )
     )
 
-    val turn2Upkeep = GameState(
-        players = listOf(
-            PlayerStateFactory.createAlice(),
-            PlayerStateFactory.createBob()
-        ),
+    val turn2Upkeep = GameStateFactory.create(
         temporalPosition = Turn(
             activePlayer = ID_BOB,
             phase = BeginningPhase(step = UpkeepStep),

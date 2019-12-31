@@ -16,7 +16,7 @@ internal class MagicEngineTest {
 
     @Test
     fun `can start game and perform actions`() {
-        val startGameState = sut.start2PlayerGame(DeckFactory.alice, DeckFactory.bob)
+        val startGameState = sut.start2PlayerGame(DeckFactory.aliceCardNames, DeckFactory.bobCardNames)
         assertThat(startGameState.temporalPosition)
             .isInstanceOf(StartingPlayerMustBeChosen::class.java)
             .given { gameStart ->

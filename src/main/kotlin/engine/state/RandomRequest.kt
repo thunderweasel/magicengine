@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RandomRequest(
-    val shuffles: List<List<Card>> = emptyList(),
+    val shuffles: List<Int> = emptyList(),
     val randomNumbers: List<Range> = emptyList()
 )
 

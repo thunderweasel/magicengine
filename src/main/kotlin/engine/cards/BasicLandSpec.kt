@@ -67,3 +67,11 @@ val ForestSpec = BasicLandSpec(
     name = "Forest",
     manaType = ManaType.GREEN
 )
+
+val allBasicLands = listOf(
+    PlainsSpec,
+    IslandSpec,
+    SwampSpec,
+    MountainSpec,
+    ForestSpec
+)

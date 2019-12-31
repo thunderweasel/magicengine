@@ -8,6 +8,7 @@ import engine.assertions.actionResultsInState
 import engine.cards.AbilitySpecId
 import engine.cards.CardType
 import engine.factories.DeckFactory
+import engine.factories.GameStateFactory
 import engine.factories.PlayerStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
@@ -18,7 +19,6 @@ import engine.state.ActivatedAbility
 import engine.state.BeginningPhase
 import engine.state.EndStep
 import engine.state.EndingPhase
-import engine.state.GameState
 import engine.state.InvalidPlayerAction
 import engine.state.Permanent
 import engine.state.PostCombatMainPhase
@@ -42,7 +42,7 @@ class PlayLandsTest {
     private val reducer = masterReducer(format = EverythingIsAForest())
     @Test
     fun `Cannot play lands if the game hasn't started`() {
-        val initialState = GameState(
+        val initialState = GameStateFactory.create(
             players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
             temporalPosition = StartingPlayerMustBeChosen(ID_ALICE)
         )
@@ -57,7 +57,7 @@ class PlayLandsTest {
 
     @Test
     fun `Cannot play lands if not the active player`() {
-        val initialState = GameState(
+        val initialState = GameStateFactory.create(
             players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
             temporalPosition = Turn(
                 activePlayer = ID_ALICE,
@@ -77,7 +77,7 @@ class PlayLandsTest {
 
     @Test
     fun `Cannot play lands if we don't have priority`() {
-        val initialState = GameState(
+        val initialState = GameStateFactory.create(
             players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
             temporalPosition = Turn(
                 activePlayer = ID_ALICE,
@@ -97,7 +97,7 @@ class PlayLandsTest {
 
     @Test
     fun `Cannot play lands that are not known in the current view`() {
-        val initialState = GameState(
+        val initialState = GameStateFactory.create(
             players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
             temporalPosition = Turn(
                 activePlayer = ID_ALICE,
@@ -118,7 +118,7 @@ class PlayLandsTest {
 
     private val successfullyPlayedLand by lazy {
         val alice = PlayerStateFactory.createAliceWithStartingHand()
-        GameState(
+        GameStateFactory.create(
             players = listOf(
                 // Card should be removed from Alice's hand
                 alice.copy(
@@ -154,7 +154,7 @@ class PlayLandsTest {
 
     @Test
     fun `Playing a land causes a land permanent to be placed on the battlefield`() {
-        val initialState = GameState(
+        val initialState = GameStateFactory.create(
             players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
             temporalPosition = Turn(
                 activePlayer = ID_ALICE,
@@ -171,7 +171,7 @@ class PlayLandsTest {
     @Test
     fun `Cannot play multiple lands on the same turn`() {
         val initialState = reducer(
-            GameState(
+            GameStateFactory.create(
                 players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
                 temporalPosition = Turn(
                     activePlayer = ID_ALICE,
@@ -193,7 +193,7 @@ class PlayLandsTest {
 
     @Test
     fun `Number of lands played is reset when the turn ends`() {
-        val initialState = GameState(
+        val initialState = GameStateFactory.create(
             players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
             temporalPosition = Turn(
                 activePlayer = ID_ALICE,
@@ -205,7 +205,7 @@ class PlayLandsTest {
 
         assertThat(initialState).actionResultsInState(
             action = PassPriority(ID_BOB),
-            expectedState = GameState(
+            expectedState = GameStateFactory.create(
                 players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
                 temporalPosition = Turn(
                     activePlayer = ID_BOB,
@@ -219,7 +219,7 @@ class PlayLandsTest {
 
     @TestFactory
     fun `Can only play lands during the main phases`(): List<DynamicNode> {
-        fun createInitialState(phase: TurnPhase) = GameState(
+        fun createInitialState(phase: TurnPhase) = GameStateFactory.create(
             players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
             temporalPosition = Turn(
                 activePlayer = ID_ALICE,

@@ -7,6 +7,7 @@ import engine.assertions.actionResultsInState
 import engine.cards.AbilitySpecId
 import engine.cards.CardType
 import engine.domain.ManaType
+import engine.factories.GameStateFactory
 import engine.factories.PlayerStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
@@ -14,7 +15,6 @@ import engine.state.ActivatedAbility
 import engine.state.Card
 import engine.state.EndStep
 import engine.state.EndingPhase
-import engine.state.GameState
 import engine.state.InvalidPlayerAction
 import engine.state.Permanent
 import engine.state.Turn
@@ -23,8 +23,7 @@ import engine.state.createManaPool
 import org.junit.jupiter.api.Test
 
 class ActivatingAbilitiesTest {
-    private val initialState = GameState(
-        players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
+    private val initialState = GameStateFactory.create(
         battlefield = createBattlefield(
             Permanent(
                 id = 1,
@@ -32,6 +31,7 @@ class ActivatingAbilitiesTest {
                 cardTypes = listOf(CardType.LAND),
                 subtypes = listOf("Forest"),
                 card = Card.KnownCard(
+                    id = 0,
                     name = "Forest"
                 ),
                 activatedAbilities = listOf(
@@ -134,6 +134,7 @@ class ActivatingAbilitiesTest {
                         cardTypes = listOf(CardType.LAND),
                         subtypes = listOf("Forest"),
                         card = Card.KnownCard(
+                            id = 0,
                             name = "Forest"
                         ),
                         activatedAbilities = listOf(

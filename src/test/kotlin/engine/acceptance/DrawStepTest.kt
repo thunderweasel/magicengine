@@ -4,12 +4,12 @@ import assertk.assertThat
 import engine.action.PassPriority
 import engine.assertions.actionResultsInState
 import engine.factories.DeckFactory
+import engine.factories.GameStateFactory
 import engine.factories.PlayerStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
 import engine.state.BeginningPhase
 import engine.state.DrawStep
-import engine.state.GameState
 import engine.state.Turn
 import engine.state.UpkeepStep
 import org.junit.jupiter.api.DisplayName
@@ -20,7 +20,7 @@ class DrawStepTest {
     @Test
     fun `on the first turn, active player does not draw a card`() {
         assertThat(
-            GameState(
+            GameStateFactory.create(
                 players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
                 temporalPosition = Turn(
                     activePlayer = ID_ALICE,
@@ -31,7 +31,7 @@ class DrawStepTest {
             )
         ).actionResultsInState(
             action = PassPriority(ID_BOB),
-            expectedState = GameState(
+            expectedState = GameStateFactory.create(
                 players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
                 temporalPosition = Turn(
                     activePlayer = ID_ALICE,
@@ -46,7 +46,7 @@ class DrawStepTest {
     @Test
     fun `when it's not the first turn, active player draws a card`() {
         assertThat(
-            GameState(
+            GameStateFactory.create(
                 players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
                 temporalPosition = Turn(
                     activePlayer = ID_BOB,
@@ -57,7 +57,7 @@ class DrawStepTest {
             )
         ).actionResultsInState(
             action = PassPriority(ID_ALICE),
-            expectedState = GameState(
+            expectedState = GameStateFactory.create(
                 players = listOf(
                     PlayerStateFactory.createAliceWithStartingHand(),
                     // Bob draws a card

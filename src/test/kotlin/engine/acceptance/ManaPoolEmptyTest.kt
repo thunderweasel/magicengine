@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import engine.action.PassPriority
 import engine.domain.ManaType
+import engine.factories.GameStateFactory
 import engine.factories.PlayerStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
@@ -17,7 +18,6 @@ import engine.state.DrawStep
 import engine.state.EndOfCombatStep
 import engine.state.EndStep
 import engine.state.EndingPhase
-import engine.state.GameState
 import engine.state.PostCombatMainPhase
 import engine.state.PreCombatMainPhase
 import engine.state.Turn
@@ -33,7 +33,7 @@ class ManaPoolEmptyTest {
     @ParameterizedTest(name = "Mana pool empties at the end of {0}")
     @MethodSource("createTestArguments")
     fun manaPoolEmptiesAtTheEndOfTurnOrStep(phaseOrStep: TurnPhase) {
-        val initialState = GameState(
+        val initialState = GameStateFactory.create(
             players = listOf(
                 PlayerStateFactory.createAliceWithStartingHand().copy(
                     manaPool = createManaPool(ManaType.BLUE to 2)

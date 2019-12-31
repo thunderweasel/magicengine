@@ -9,13 +9,14 @@ import engine.state.PermanentId
 import engine.state.PlayerId
 
 object PermanentFactory {
-    fun createBasicLand(spec: BasicLandSpec, id: PermanentId, owner: PlayerId) =
+    fun createBasicLand(spec: BasicLandSpec, permanentId: PermanentId, owner: PlayerId) =
         Permanent(
-            id = id,
+            id = permanentId,
             name = spec.name,
             cardTypes = listOf(CardType.LAND),
             subtypes = listOf(spec.name),
             card = Card.KnownCard(
+                id = 0,
                 name = spec.name
             ),
             activatedAbilities = listOf(

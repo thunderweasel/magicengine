@@ -1,8 +1,8 @@
 package engine.action
 
-import engine.state.Card
-
 data class ResolvedRandomization(
-    val completedShuffles: List<List<Card>> = emptyList(),
+    // Each completed shuffle will have a list of integers, where each integer is the original position of that
+    // card in the list before it was shuffled.
+    val completedShuffles: List<List<Int>> = emptyList(),
     val generatedNumbers: List<Int> = emptyList()
 )

@@ -5,6 +5,7 @@ import assertk.assertions.isDataClassEqualTo
 import engine.action.PendingRandomization
 import engine.action.PerformMulligans
 import engine.factories.DeckFactory
+import engine.factories.GameStateFactory
 import engine.factories.PlayerStateFactory
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
@@ -13,7 +14,7 @@ import org.junit.jupiter.api.Test
 class GameStateSerializationTest {
     private val exampleState =
         GameStatePendingRandomization(
-            gameState = GameState(
+            gameState = GameStateFactory.create(
                 players = listOf(
                     PlayerState(
                         id = PlayerStateFactory.ID_ALICE,

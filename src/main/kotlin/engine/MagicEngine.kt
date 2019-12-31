@@ -8,7 +8,6 @@ import engine.random.RandomShuffler
 import engine.random.RandomizationResolver
 import engine.reducer.GameStatePendingRandomizationReducer
 import engine.reducer.masterReducer
-import engine.state.Card
 import engine.state.GameState
 import engine.state.noPendingRandomization
 import kotlin.random.Random
@@ -22,7 +21,7 @@ class MagicEngine(
         randomizer = ActualRandomizer(Random.Default)
     )
 ) {
-    fun start2PlayerGame(deck1: List<Card>, deck2: List<Card>): GameState {
+    fun start2PlayerGame(deck1: List<String>, deck2: List<String>): GameState {
         return randomizationResolver.resolve(startingState(playerDecks = listOf(deck1, deck2)))
     }
 

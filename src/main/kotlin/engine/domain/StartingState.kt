@@ -4,6 +4,7 @@ import engine.action.ElectDeciderOfStartingPlayer
 import engine.action.PendingRandomization
 import engine.state.Card
 import engine.state.GameState
+import engine.state.IdState
 import engine.state.PlayerState
 import engine.state.RandomRequest
 import engine.state.Range
@@ -35,7 +36,10 @@ fun startingState(
             )
         },
         temporalPosition = StartingPlayerMustBeChosen(player = null),
-        nextCardId = prevId + 1
+        idState = IdState(
+            nextCardId = prevId + 1,
+            nextPermanentId = 1
+        )
     ).pendingRandomization(PendingRandomization(
         actionOnResolution = ElectDeciderOfStartingPlayer,
         request = RandomRequest(

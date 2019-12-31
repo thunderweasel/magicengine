@@ -5,22 +5,20 @@ import engine.action.PassPriority
 import engine.action.PlayLand
 import engine.assertions.actionResultsInError
 import engine.assertions.actionResultsInState
-import engine.cards.AbilitySpecId
-import engine.cards.CardType
 import engine.factories.DeckFactory
 import engine.factories.GameStateFactory
+import engine.factories.PermanentFactory
 import engine.factories.PlayerStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
-import engine.formats.EverythingIsAForest
+import engine.formats.AllSpellsAreBurnSpells
 import engine.reducer.masterReducer
 import engine.reducer.turnPhases
-import engine.state.ActivatedAbility
 import engine.state.BeginningPhase
+import engine.state.Card
 import engine.state.EndStep
 import engine.state.EndingPhase
 import engine.state.InvalidPlayerAction
-import engine.state.Permanent
 import engine.state.PostCombatMainPhase
 import engine.state.PreCombatMainPhase
 import engine.state.StartingPlayerMustBeChosen
@@ -39,7 +37,8 @@ import org.junit.jupiter.api.TestFactory
 
 @DisplayName("305. Playing lands")
 class PlayLandsTest {
-    private val reducer = masterReducer(format = EverythingIsAForest())
+    private val permanentFactory = PermanentFactory()
+    private val reducer = masterReducer(format = AllSpellsAreBurnSpells())
     @Test
     fun `Cannot play lands if the game hasn't started`() {
         val initialState = GameStateFactory.create(
@@ -147,18 +146,10 @@ class PlayLandsTest {
                 PlayerStateFactory.createBobWithStartingHand()
             ),
             battlefield = createBattlefield(
-                Permanent(
-                    id = 1,
-                    name = DeckFactory.alice[0].name,
-                    cardTypes = listOf(CardType.LAND),
-                    subtypes = listOf("Forest"),
-                    card = DeckFactory.alice[0],
-                    controller = ID_ALICE,
-                    activatedAbilities = listOf(ActivatedAbility(
-                        id = 1,
-                        permanentId = 1,
-                        specId = AbilitySpecId("Forest", 1)
-                    ))
+                permanentFactory.createBasicLand(
+                    card = alice.hand[0] as Card.KnownCard,
+                    permanentId = 1,
+                    controller = ID_ALICE
                 )
             ),
             temporalPosition = Turn(

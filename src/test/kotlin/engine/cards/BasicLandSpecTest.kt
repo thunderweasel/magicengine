@@ -8,7 +8,9 @@ import engine.factories.GameStateFactory
 import engine.factories.PermanentFactory
 import engine.factories.PlayerStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
+import engine.formats.AllSpellsAreBurnSpells
 import engine.state.BeginningOfCombatStep
+import engine.state.Card
 import engine.state.CombatPhase
 import engine.state.Turn
 import engine.state.createBattlefield
@@ -19,18 +21,12 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 internal class BasicLandSpecTest {
-    private val basicLands = listOf(
-        PlainsSpec,
-        IslandSpec,
-        SwampSpec,
-        MountainSpec,
-        ForestSpec
-    )
+    private val permanentFactory = PermanentFactory(format = AllSpellsAreBurnSpells())
 
     @ParameterizedTest(name = "{0} produces {1}")
     @MethodSource("createTestArguments")
     fun landProducesCorrectMana(name: String, manaType: ManaType) {
-        val spec = basicLands.find { it.name == name }!!
+        val spec = allBasicLands.find { it.name == name }!!
         val initialState = createInitialState(spec)
         val newState =
             spec.manaAbility.resolve(initialState, initialState.battlefield.getValue(1).activatedAbilities[0])
@@ -58,7 +54,7 @@ internal class BasicLandSpecTest {
     private fun createInitialState(spec: BasicLandSpec) = GameStateFactory.create(
         players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
         battlefield = createBattlefield(
-            PermanentFactory.createBasicLand(spec, permanentId = 1, owner = ID_ALICE)
+            permanentFactory.createBasicLand(Card.KnownCard(0, spec.name), permanentId = 1, controller = ID_ALICE)
         ),
         temporalPosition = Turn(
             activePlayer = ID_ALICE,

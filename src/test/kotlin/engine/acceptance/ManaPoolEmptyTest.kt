@@ -8,7 +8,7 @@ import engine.factories.GameStateFactory
 import engine.factories.PlayerStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
-import engine.formats.EverythingIsAForest
+import engine.formats.AllSpellsAreBurnSpells
 import engine.reducer.masterReducer
 import engine.state.BeginningOfCombatStep
 import engine.state.BeginningPhase
@@ -47,7 +47,7 @@ class ManaPoolEmptyTest {
             )
         )
         val newState =
-            masterReducer(format = EverythingIsAForest())(initialState.noPendingRandomization(), PassPriority(ID_BOB))
+            masterReducer(format = AllSpellsAreBurnSpells())(initialState.noPendingRandomization(), PassPriority(ID_BOB))
         assertThat(newState.gameState.players[0].manaPool).isEqualTo(createManaPool())
     }
 

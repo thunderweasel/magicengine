@@ -8,7 +8,8 @@ import assertk.assertions.isNull
 import assertk.assertions.prop
 import engine.action.GameAction
 import engine.action.PlayerAction
-import engine.formats.EverythingIsAForest
+import engine.formats.AllSpellsAreBurnSpells
+import engine.formats.MagicFormat
 import engine.reducer.StatePendingRandomizationReducer
 import engine.reducer.masterReducer
 import engine.state.GameState
@@ -17,22 +18,24 @@ import engine.state.noPendingRandomization
 
 fun Assert<GameState>.actionResultsInState(
     action: GameAction,
-    expectedState: GameState
+    expectedState: GameState,
+    format: MagicFormat = AllSpellsAreBurnSpells()
 ) = transform { actual ->
     actual.noPendingRandomization()
 }.actionResultsInState(
-    reducer = masterReducer(format = EverythingIsAForest()),
+    reducer = masterReducer(format = format),
     action = action,
     expectedState = expectedState
 )
 
 fun Assert<GameState>.actionResultsInError(
     action: PlayerAction,
-    expectedError: Throwable
+    expectedError: Throwable,
+    format: MagicFormat = AllSpellsAreBurnSpells()
 ) = transform { actual ->
     actual.noPendingRandomization()
 }.actionResultsInError(
-    reducer = masterReducer(format = EverythingIsAForest()),
+    reducer = masterReducer(format = format),
     action = action,
     expectedError = expectedError
 )

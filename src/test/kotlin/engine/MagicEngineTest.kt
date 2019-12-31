@@ -6,13 +6,13 @@ import assertk.assertions.isNotNull
 import engine.action.ChooseFirstPlayer
 import engine.factories.DeckFactory
 import engine.factories.PlayerStateFactory
-import engine.formats.EverythingIsAForest
+import engine.formats.AllSpellsAreBurnSpells
 import engine.state.ResolvingMulligans
 import engine.state.StartingPlayerMustBeChosen
 import org.junit.jupiter.api.Test
 
 internal class MagicEngineTest {
-    private val sut = MagicEngine(format = EverythingIsAForest())
+    private val sut = MagicEngine(format = AllSpellsAreBurnSpells())
 
     @Test
     fun `can start game and perform actions`() {

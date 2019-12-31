@@ -1,8 +1,8 @@
 package engine.factories
 
 import engine.state.Battlefield
-import engine.state.CardId
 import engine.state.GameState
+import engine.state.IdState
 import engine.state.PlayerId
 import engine.state.PlayerState
 import engine.state.TemporalPosition
@@ -14,12 +14,16 @@ object GameStateFactory {
         players: List<PlayerState> = PlayerStateFactory.createAliceAndBobWithStartingHands(),
         battlefield: Battlefield = createBattlefield(),
         temporalPosition: TemporalPosition,
-        nextCardId: CardId = 121 // Assuming two 60 card decks and no re-generation, this will be the next ID
+        nextCardId: Int = 121,
+        nextPermanentId: Int = 1
     ): GameState = GameState(
         viewer = viewer,
         players = players,
         battlefield = battlefield,
         temporalPosition = temporalPosition,
-        nextCardId = nextCardId
+        idState = IdState(
+            nextCardId = nextCardId,
+            nextPermanentId = nextPermanentId
+        )
     )
 }

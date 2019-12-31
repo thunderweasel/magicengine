@@ -11,5 +11,5 @@ data class GameState(
     val players: List<PlayerState>,
     val battlefield: Battlefield = createBattlefield(),
     val temporalPosition: TemporalPosition,
-    val nextCardId: CardId
+    val idState: IdState
 )

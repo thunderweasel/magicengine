@@ -9,7 +9,7 @@ import engine.factories.DeckFactory
 import engine.factories.GameStateFactory
 import engine.factories.PlayerStateFactory.ID_ALICE
 import engine.factories.PlayerStateFactory.ID_BOB
-import engine.formats.EverythingIsAForest
+import engine.formats.AllSpellsAreBurnSpells
 import engine.reducer.masterReducer
 import engine.state.BeginningPhase
 import engine.state.GameState
@@ -35,7 +35,7 @@ private fun completedShuffles(numberOfDecks: Int) =
 
 @DisplayName("103. Starting the Game")
 class StartingTheGameTest : StateTreeTest<GameState>(
-    reducer = masterReducer(format = EverythingIsAForest()),
+    reducer = masterReducer(format = AllSpellsAreBurnSpells()),
     root =
     makeStateTree {
         pendingRandomization(
@@ -161,7 +161,9 @@ private object MulliganStates {
                     lifeTotal = 20
                 )
             ),
-            temporalPosition = StartingPlayerMustBeChosen(ID_ALICE)
+            temporalPosition = StartingPlayerMustBeChosen(ID_ALICE),
+            nextCardId = 121,
+            nextPermanentId = 1
         )
     }
 

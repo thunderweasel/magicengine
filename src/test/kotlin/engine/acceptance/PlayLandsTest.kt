@@ -159,7 +159,8 @@ class PlayLandsTest {
                 priority = ID_ALICE,
                 // Record that we've played a land
                 history = TurnHistory(numberOfLandsPlayed = 1)
-            )
+            ),
+            nextPermanentId = 2
         )
     }
 
@@ -255,6 +256,9 @@ class PlayLandsTest {
                                 phase = phase,
                                 priority = ID_ALICE,
                                 history = TurnHistory(numberOfLandsPlayed = 1)
+                            ),
+                            idState = initialState.idState.copy(
+                                nextPermanentId = 2
                             )
                         )
                     )

@@ -58,7 +58,7 @@ private fun playLand(state: GameState, action: PlayLand, format: MagicFormat): G
         },
         battlefield = state.battlefield.adding(
             Permanent(
-                id = 1, // TODO: ensure unique IDs
+                id = state.idState.nextPermanentId,
                 name = card.name,
                 cardTypes = cardSpec.cardTypes,
                 subtypes = cardSpec.subtypes,
@@ -77,6 +77,9 @@ private fun playLand(state: GameState, action: PlayLand, format: MagicFormat): G
             history = turn.history.copy(
                 numberOfLandsPlayed = turn.history.numberOfLandsPlayed + 1
             )
+        ),
+        idState = state.idState.copy(
+            nextPermanentId = state.idState.nextPermanentId + 1
         )
     )
 }

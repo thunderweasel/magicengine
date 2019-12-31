@@ -15,7 +15,7 @@ object GameStateFactory {
         battlefield: Battlefield = createBattlefield(),
         temporalPosition: TemporalPosition,
         nextCardId: Int = 121,
-        nextPermanentId: Int = 1
+        nextPermanentId: Long = 1L
     ): GameState = GameState(
         viewer = viewer,
         players = players,

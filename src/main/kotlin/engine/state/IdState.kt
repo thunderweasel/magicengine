@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class IdState(
-    val nextCardId: Int,
-    val nextPermanentId: Int
+    val nextCardId: CardId,
+    val nextPermanentId: PermanentId
 )

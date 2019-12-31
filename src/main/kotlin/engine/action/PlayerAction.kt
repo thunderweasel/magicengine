@@ -1,6 +1,7 @@
 package engine.action
 
 import engine.state.AbilityId
+import engine.state.CardId
 import engine.state.PermanentId
 import engine.state.PlayerId
 
@@ -17,8 +18,12 @@ data class ChooseToKeepHand(
 data class ChooseToMulligan(override val actingPlayer: PlayerId) : PlayerAction()
 
 data class PassPriority(override val actingPlayer: PlayerId) : PlayerAction()
-data class DeclareAttackers(override val actingPlayer: PlayerId) :
-    PlayerAction() // TODO: should actually list attackers
+// TODO: should actually list attackers
+data class DeclareAttackers(override val actingPlayer: PlayerId) : PlayerAction()
 
-data class PlayLand(override val actingPlayer: PlayerId, val indexInHand: Int) : PlayerAction()
-data class ActivateAbility(override val actingPlayer: PlayerId, val permanentId: PermanentId, val abilityId: AbilityId) : PlayerAction()
+data class PlayLand(override val actingPlayer: PlayerId, val cardId: CardId) : PlayerAction()
+data class ActivateAbility(
+    override val actingPlayer: PlayerId,
+    val permanentId: PermanentId,
+    val abilityId: AbilityId
+) : PlayerAction()

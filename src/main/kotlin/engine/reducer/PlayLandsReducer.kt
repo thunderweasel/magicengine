@@ -21,7 +21,12 @@ fun playLandsReducer(format: MagicFormat): GameStatePendingRandomizationReducer 
 
 private fun playLand(state: GameState, action: PlayLand, format: MagicFormat): GameState {
     val turn = mustBeActivePlayerWithPriority(state, action)
-    val card = state.player(action.actingPlayer).hand[action.indexInHand]
+    val card = state.player(action.actingPlayer).hand.find { it.id == action.cardId }
+        ?: throw InvalidPlayerAction(
+            action = action,
+            state = state,
+            reason = "Card ID ${action.cardId} is not in player ${action.actingPlayer}'s hand"
+        )
     if (card !is Card.KnownCard) {
         throw InvalidPlayerAction(
             action = action,
@@ -48,9 +53,7 @@ private fun playLand(state: GameState, action: PlayLand, format: MagicFormat): G
     return state.copy(
         players = state.replacePlayerState(action.actingPlayer) {
             copy(
-                hand = hand.toMutableList().apply {
-                    removeAt(action.indexInHand)
-                }
+                hand = hand.filter { it.id != action.cardId }
             )
         },
         battlefield = state.battlefield.adding(

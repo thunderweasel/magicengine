@@ -47,9 +47,9 @@ class PlayLandsTest {
             temporalPosition = StartingPlayerMustBeChosen(ID_ALICE)
         )
         assertThat(initialState).actionResultsInError(
-            action = PlayLand(ID_ALICE, 0),
+            action = PlayLand(ID_ALICE, DeckFactory.alice[0].id),
             expectedError = InvalidPlayerAction.invalidTemporalState(
-                action = PlayLand(ID_ALICE, 0),
+                action = PlayLand(ID_ALICE, DeckFactory.alice[0].id),
                 state = initialState
             )
         )
@@ -66,9 +66,9 @@ class PlayLandsTest {
             )
         )
         assertThat(initialState).actionResultsInError(
-            action = PlayLand(ID_BOB, 0),
+            action = PlayLand(ID_BOB, DeckFactory.bob[0].id),
             expectedError = InvalidPlayerAction(
-                action = PlayLand(ID_BOB, 0),
+                action = PlayLand(ID_BOB, DeckFactory.bob[0].id),
                 state = initialState,
                 reason = "Player $ID_BOB is not the active player"
             )
@@ -86,11 +86,31 @@ class PlayLandsTest {
             )
         )
         assertThat(initialState).actionResultsInError(
-            action = PlayLand(ID_ALICE, 0),
+            action = PlayLand(ID_ALICE, DeckFactory.alice[0].id),
             expectedError = InvalidPlayerAction(
-                action = PlayLand(ID_ALICE, 0),
+                action = PlayLand(ID_ALICE, DeckFactory.alice[0].id),
                 state = initialState,
                 reason = "Player $ID_ALICE does not have priority"
+            )
+        )
+    }
+
+    @Test
+    fun `Cannot play a land that does not exist in our hand`() {
+        val initialState = GameStateFactory.create(
+            players = PlayerStateFactory.createAliceAndBobWithStartingHands(),
+            temporalPosition = Turn(
+                activePlayer = ID_ALICE,
+                phase = PreCombatMainPhase,
+                priority = ID_ALICE
+            )
+        )
+        assertThat(initialState).actionResultsInError(
+            action = PlayLand(ID_ALICE, DeckFactory.alice[32].id),
+            expectedError = InvalidPlayerAction(
+                action = PlayLand(ID_ALICE, DeckFactory.alice[32].id),
+                state = initialState,
+                reason = "Card ID ${DeckFactory.alice[32].id} is not in player $ID_ALICE's hand"
             )
         )
     }
@@ -107,9 +127,9 @@ class PlayLandsTest {
         ).viewAs(ID_BOB) // Alice's cards should be Unknown
 
         assertThat(initialState).actionResultsInError(
-            action = PlayLand(ID_ALICE, 0),
+            action = PlayLand(ID_ALICE, DeckFactory.alice[0].id),
             expectedError = InvalidPlayerAction(
-                action = PlayLand(ID_ALICE, 0),
+                action = PlayLand(ID_ALICE, DeckFactory.alice[0].id),
                 state = initialState,
                 reason = "Cannot play unknown card"
             )
@@ -163,7 +183,7 @@ class PlayLandsTest {
             )
         )
         assertThat(initialState).actionResultsInState(
-            action = PlayLand(ID_ALICE, 0),
+            action = PlayLand(ID_ALICE, DeckFactory.alice[0].id),
             expectedState = successfullyPlayedLand
         )
     }
@@ -178,13 +198,14 @@ class PlayLandsTest {
                     phase = PreCombatMainPhase,
                     priority = ID_ALICE
                 )
-            ).noPendingRandomization(), PlayLand(ID_ALICE, 0)
+            ).noPendingRandomization(),
+            PlayLand(ID_ALICE, DeckFactory.alice[0].id)
         )
 
         assertThat(initialState.gameState).actionResultsInError(
-            action = PlayLand(ID_ALICE, 0),
+            action = PlayLand(ID_ALICE, DeckFactory.alice[1].id),
             expectedError = InvalidPlayerAction(
-                action = PlayLand(ID_ALICE, 0),
+                action = PlayLand(ID_ALICE, DeckFactory.alice[1].id),
                 state = initialState.gameState,
                 reason = "Player $ID_ALICE cannot play another land this turn"
             )
@@ -229,7 +250,7 @@ class PlayLandsTest {
             )
         )
 
-        val action = PlayLand(ID_ALICE, indexInHand = 0)
+        val action = PlayLand(ID_ALICE, cardId = DeckFactory.alice[0].id)
 
         return turnPhases.map { phase ->
             if (phase == PreCombatMainPhase || phase == PostCombatMainPhase) {

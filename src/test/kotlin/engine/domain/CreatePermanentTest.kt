@@ -3,6 +3,9 @@ package engine.domain
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import engine.cards.AbilitySpecId
+import engine.cards.ActivatedAbilitySpec
+import engine.cards.BasicManaAbilitySpec
+import engine.cards.CardSpec
 import engine.cards.CardType
 import engine.cards.ForestSpec
 import engine.factories.GameStateFactory
@@ -110,6 +113,61 @@ internal class CreatePermanentTest {
                             id = 1,
                             permanentId = 3,
                             specId = AbilitySpecId("Forest", 1)
+                        )
+                    ),
+                    tapped = false,
+                    controller = ID_ALICE
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `when the card has multiple abilities, ensure that they have unique IDs`() {
+        val card = Card.KnownCard(2, "A Card")
+        val cardSpec = object : CardSpec {
+            override val name: String = "A Card"
+            override val cardTypes: List<CardType> = listOf(CardType.LAND)
+            override val subtypes: List<String> = emptyList()
+            override val isBasicLand: Boolean = false
+            override val activatedAbilities: List<ActivatedAbilitySpec> = listOf(
+                BasicManaAbilitySpec(
+                    cardName = "A Card",
+                    manaType = ManaType.BLUE,
+                    idNumber = 123
+                ),
+                BasicManaAbilitySpec(
+                    cardName = "A Card",
+                    manaType = ManaType.WHITE,
+                    idNumber = 321
+                )
+            )
+        }
+
+        val newState = initialState.createPermanent(
+            card = card,
+            cardSpec = cardSpec,
+            controller = ID_ALICE
+        )
+
+        assertThat(newState.battlefield).isEqualTo(
+            createBattlefield(
+                Permanent(
+                    id = 1,
+                    name = "A Card",
+                    cardTypes = listOf(CardType.LAND),
+                    subtypes = emptyList(),
+                    card = card,
+                    activatedAbilities = listOf(
+                        ActivatedAbility(
+                            id = 1,
+                            permanentId = 1,
+                            specId = AbilitySpecId("A Card", 123)
+                        ),
+                        ActivatedAbility(
+                            id = 2,
+                            permanentId = 1,
+                            specId = AbilitySpecId("A Card", 321)
                         )
                     ),
                     tapped = false,

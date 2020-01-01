@@ -3,7 +3,7 @@ package engine.state
 import engine.cards.AbilitySpecId
 import kotlinx.serialization.Serializable
 
-typealias AbilityId = Long
+typealias AbilityId = Int
 
 /**
  * Representation of an activated ability on a permanent in the game state.

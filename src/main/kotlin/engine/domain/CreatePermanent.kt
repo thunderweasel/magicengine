@@ -23,9 +23,9 @@ fun GameState.createPermanent(
                 subtypes = cardSpec.subtypes,
                 card = card,
                 controller = controller,
-                activatedAbilities = cardSpec.activatedAbilities.map { abilitySpec ->
+                activatedAbilities = cardSpec.activatedAbilities.mapIndexed { index, abilitySpec ->
                     ActivatedAbility(
-                        id = 1, // TODO: ability IDs should be unique within the permanent
+                        id = index + 1,
                         permanentId = permanentId,
                         specId = abilitySpec.id
                     )

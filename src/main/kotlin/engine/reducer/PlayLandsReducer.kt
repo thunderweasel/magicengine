@@ -1,15 +1,13 @@
 package engine.reducer
 
 import engine.action.PlayLand
+import engine.domain.createPermanent
 import engine.formats.MagicFormat
-import engine.state.ActivatedAbility
 import engine.state.Card
 import engine.state.GameState
 import engine.state.InvalidPlayerAction
-import engine.state.Permanent
 import engine.state.PostCombatMainPhase
 import engine.state.PreCombatMainPhase
-import engine.state.adding
 import engine.state.noPendingRandomization
 
 fun playLandsReducer(format: MagicFormat): GameStatePendingRandomizationReducer = { state, action ->
@@ -50,36 +48,22 @@ private fun playLand(state: GameState, action: PlayLand, format: MagicFormat): G
             reason = "Lands can only be played during the active player's main phase"
         )
     }
-    return state.copy(
-        players = state.replacePlayerState(action.actingPlayer) {
-            copy(
-                hand = hand.filter { it.id != action.cardId }
-            )
-        },
-        battlefield = state.battlefield.adding(
-            Permanent(
-                id = state.idState.nextPermanentId,
-                name = card.name,
-                cardTypes = cardSpec.cardTypes,
-                subtypes = cardSpec.subtypes,
-                card = card,
-                controller = action.actingPlayer,
-                activatedAbilities = cardSpec.activatedAbilities.map { abilitySpec ->
-                    ActivatedAbility(
-                        id = 1, // TODO: ensure unique IDs
-                        permanentId = 1,
-                        specId = abilitySpec.id
-                    )
-                }
-            )
-        ),
-        temporalPosition = turn.copy(
-            history = turn.history.copy(
-                numberOfLandsPlayed = turn.history.numberOfLandsPlayed + 1
-            )
-        ),
-        idState = state.idState.copy(
-            nextPermanentId = state.idState.nextPermanentId + 1
+    return state
+        .createPermanent(
+            card = card,
+            cardSpec = cardSpec,
+            controller = action.actingPlayer
         )
-    )
+        .copy(
+            players = state.replacePlayerState(action.actingPlayer) {
+                copy(
+                    hand = hand.filter { it.id != action.cardId }
+                )
+            },
+            temporalPosition = turn.copy(
+                history = turn.history.copy(
+                    numberOfLandsPlayed = turn.history.numberOfLandsPlayed + 1
+                )
+            )
+        )
 }

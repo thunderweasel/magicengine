@@ -7,8 +7,16 @@ import engine.state.Turn
 import engine.state.UpkeepStep
 
 fun GameState.startTurn(activePlayer: PlayerId, firstTurn: Boolean = false): GameState =
-    // TODO: Untap step should occur (when, you know, permanents exist)
     copy(
+        battlefield = battlefield.mapValues { (_, permanent) ->
+            if (permanent.controller == activePlayer) {
+                permanent.copy(
+                    tapped = false
+                )
+            } else {
+                permanent
+            }
+        },
         temporalPosition = Turn(
             activePlayer = activePlayer,
             phase = BeginningPhase(step = UpkeepStep),

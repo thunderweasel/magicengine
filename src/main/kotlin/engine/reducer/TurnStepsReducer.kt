@@ -19,6 +19,7 @@ import engine.state.PostCombatMainPhase
 import engine.state.PreCombatMainPhase
 import engine.state.Turn
 import engine.state.TurnPhase
+import engine.state.UntapStep
 import engine.state.UpkeepStep
 import engine.state.createManaPool
 import engine.state.noPendingRandomization
@@ -32,8 +33,7 @@ val turnStepsReducer: GameStatePendingRandomizationReducer = { state, action ->
 }
 
 val turnPhases = listOf(
-    // TODO: Will add this in when there are permanents to untap (no priority pass on untap step)
-    // BeginningPhase(step = UntapStep),
+    BeginningPhase(step = UntapStep),
     BeginningPhase(step = UpkeepStep),
     BeginningPhase(step = DrawStep),
     PreCombatMainPhase,

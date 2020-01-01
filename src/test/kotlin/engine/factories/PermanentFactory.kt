@@ -13,7 +13,12 @@ import engine.state.PlayerId
 class PermanentFactory(
     private val format: MagicFormat = AllSpellsAreBurnSpells()
 ) {
-    fun createBasicLand(card: Card.KnownCard, permanentId: PermanentId, controller: PlayerId): Permanent {
+    fun createBasicLand(
+        card: Card.KnownCard,
+        permanentId: PermanentId,
+        controller: PlayerId,
+        tapped: Boolean = false
+    ): Permanent {
         val spec = format.cardLookup[card.name] as BasicLandSpec
         return Permanent(
             id = permanentId,
@@ -28,7 +33,8 @@ class PermanentFactory(
                     specId = spec.manaAbility.id
                 )
             ),
-            controller = controller
+            controller = controller,
+            tapped = tapped
         )
     }
 }
